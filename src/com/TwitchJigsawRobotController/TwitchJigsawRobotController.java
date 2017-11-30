@@ -29,8 +29,9 @@ implements ActionListener, PropertyChangeListener  {
     static public String NETWORK = "irc.chat.twitch.tv";
     static public int PORT = 6667;
     static public String PASSWORD = "oauth:j1xd8duzvlhuov9yczcrxgmo1eym3m";
-	static public long ANNOUNCE_DELAY = 120000; // ms
-    
+	static public long ANNOUNCE_DELAY = 60000; // ms
+	static public long SANITY_DROP_DELAY = 120000; // ms
+	
 	private XCarveInterface XCarve;
     private AddonInterface Addon;
     private String IPAddress;
@@ -120,11 +121,12 @@ implements ActionListener, PropertyChangeListener  {
 	public class AnnounceWhere extends TimerTask {
 		public void run() {
 			// don't spam the channel
-			if(System.currentTimeMillis()<lastMove+ANNOUNCE_DELAY) {
+			if(System.currentTimeMillis()>lastMove+ANNOUNCE_DELAY) {
 				// announce the location of the robot
 				where(CHANNEL);
 				dropOnce=true;
-			} else if(dropOnce==true) {
+			} 
+			if(dropOnce==true && System.currentTimeMillis()>lastMove+SANITY_DROP_DELAY) {
 				System.out.println("Automated sanity drop");
 				drop();
 				dropOnce=false;
