@@ -168,6 +168,11 @@ public class XCarveInterface implements SerialPortEventListener{
 	public float getX() { return x; }
 	public float getY() { return y; }
 
+	public boolean isInBounds(float newX,float newY) {
+		return (newX>=0 && newX< MAX_X 
+			 && newY>=0 && newY< MAX_Y);
+	}
+	
 	/**
 	 * move the robot to a new x,y.
 	 * @param newX
@@ -175,14 +180,13 @@ public class XCarveInterface implements SerialPortEventListener{
 	 * @return false if out of bounds, true if move allowed.
 	 */
     public boolean moveAbsolute(float newX,float newY) {
-    	if(newX>=0 && newX< MAX_X 
-    	&& newY>=0 && newY< MAX_Y) {
-    		x=newX;
-    		y=newY;
-    		send("G0 X"+x+" Y"+y);
-    		return true;
-    	}
-    	return false;  // out of bounds
+    	if(!isInBounds(newX,newY))
+    		return false;
+    		
+		x=newX;
+		y=newY;
+		send("G0 X"+x+" Y"+y);
+		return true;
     }
     
     public void north() {

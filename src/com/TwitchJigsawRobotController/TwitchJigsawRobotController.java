@@ -241,6 +241,7 @@ implements ActionListener, PropertyChangeListener  {
 		boolean ignore=false;
 		float newX = XCarve.getX();
 		float newY = XCarve.getY();
+		float newA = Addon.getAngleDegrees();
 
 		StringTokenizer st = new StringTokenizer(message);
 		while(st.hasMoreTokens()) {
@@ -250,6 +251,8 @@ implements ActionListener, PropertyChangeListener  {
 				newX = Float.parseFloat(tok.substring(1));
 			} else if(tok.startsWith("Y")) {
 				newY = Float.parseFloat(tok.substring(1));
+			} else if(tok.startsWith("A")) {
+				newA = Float.parseFloat(tok.substring(1));
 			} else if(tok.equals(command)){
 			} else {
 				// badly formed commands are ignored, even if some parts are OK.
@@ -258,10 +261,15 @@ implements ActionListener, PropertyChangeListener  {
 		}
 		
 		if(ignore==false) {
-			if(XCarve.moveAbsolute(newX, newY)) {
-				sendMessage(CHANNEL,"Moving to "+newX +", "+newY+"...");
-			} else {
+			if(!XCarve.isInBounds(newX, newY)) {
 				sendMessage(CHANNEL,""+newX +", "+newY+" is out of bounds.");
+			} else {
+				sendMessage(CHANNEL,"Moving to X"+newX +" Y"+newY+"...");
+				XCarve.moveAbsolute(newX, newY);
+			}
+			if(newA != Addon.getAngleDegrees()) {
+				sendMessage(CHANNEL,"Turning to A"+newA);
+				Addon.turnAbsolute(newA);
 			}
 		}
 		return ignore;

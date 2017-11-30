@@ -14,6 +14,7 @@ public class AddonInterface implements SerialPortEventListener {
     static String CUE = "ok";
     static long DISCONNECT_CLOCK_DELAY = 20000;
     static long DISCONNECT_TIMEOUT = 60000;
+    static int STEPS_PER_TURN = 200;
     
 	private String serial_recv_buffer=new String();
     private SerialPort addonPort;
@@ -141,12 +142,12 @@ public class AddonInterface implements SerialPortEventListener {
     }
     
     public void turnLeft() {
-    	angle++;
+    	angle= (angle + STEPS_PER_TURN +1 ) % STEPS_PER_TURN;
     	send("R0");
     }
     
     public void turnRight() {
-    	angle--;
+    	angle= (angle + STEPS_PER_TURN -1 ) % STEPS_PER_TURN;
     	send("R1");
     }
     
@@ -160,8 +161,34 @@ public class AddonInterface implements SerialPortEventListener {
     	send("S0");
     }
     
+    public float getAngleDegrees() {
+    	// convert motor steps to degrees 
+    	float angleDegrees = (float)(angle%STEPS_PER_TURN) * (360.0f/(float)STEPS_PER_TURN);
+    	return angleDegrees;
+    }
+    
+    public void turnAbsolute(float newAngleDegrees) {
+    	while(newAngleDegrees<0) newAngleDegrees+=360;
+    	// convert degrees to motor steps
+    	int newAngle = (int)( newAngleDegrees * (float)STEPS_PER_TURN / 360.0f );
+
+    	// from here on all values are in motor steps.
+    	int delta = newAngle - angle;
+    	if(delta<0) {
+    		delta=-delta;
+    		for(int i=0;i<delta;++i) {
+    			turnLeft();
+    		}
+    	} else {
+    		// delta > 0
+    		for(int i=0;i<delta;++i) {
+    			turnRight();
+    		}
+    	}
+    }
+    
     public String where() {
-    	float angleDegrees = (float)(angle%200) * (360.0f/200.0f);
+    	float angleDegrees = getAngleDegrees();
     	DecimalFormat df = new DecimalFormat();
     	df.setMaximumFractionDigits(2);
     	
