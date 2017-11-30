@@ -182,10 +182,13 @@ public class XCarveInterface implements SerialPortEventListener{
     public boolean moveAbsolute(float newX,float newY) {
     	if(!isInBounds(newX,newY))
     		return false;
-    		
+
 		x=newX;
 		y=newY;
-		send("G0 X"+x+" Y"+y);
+		absoluteMode();
+		send("G0 X"+x+" Y"+y+" F500");
+		relativeMode();
+		
 		return true;
     }
     
