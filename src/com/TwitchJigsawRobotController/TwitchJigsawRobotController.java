@@ -290,7 +290,7 @@ implements ActionListener, PropertyChangeListener  {
 
     protected void where(String sender) {
 		// report machine state here
-		String arg1 = /*IPAddress+":12345 "+*/ XCarve.where() + " " + Addon.where();
+		String arg1 = "I am at "+/*IPAddress+":12345 "+*/ XCarve.where() + " " + Addon.where();
 		if(sender.equals(CHANNEL)) sendMessage(CHANNEL,arg1);
 		else privMessage(sender, arg1);
     }
