@@ -43,6 +43,7 @@ implements ActionListener, PropertyChangeListener  {
     
 	private long lastMove;
     private boolean dropOnce;
+    private boolean announceOnce;
 
     
 	public static void main(String[] argv) throws Exception {
@@ -66,6 +67,8 @@ implements ActionListener, PropertyChangeListener  {
 		setupAnnouncementTimer();
 		setupDialog();
 		lastMove=System.currentTimeMillis();
+		announceOnce=false;
+		dropOnce=false;
 	}
 	
 	
@@ -121,15 +124,16 @@ implements ActionListener, PropertyChangeListener  {
 	public class AnnounceWhere extends TimerTask {
 		public void run() {
 			// don't spam the channel
-			if(System.currentTimeMillis()>lastMove+ANNOUNCE_DELAY) {
+			if(announceOnce==false && System.currentTimeMillis()>lastMove+ANNOUNCE_DELAY) {
 				// announce the location of the robot
 				where(CHANNEL);
-				dropOnce=true;
+				dropOnce=false;
+				announceOnce=true;
 			} 
-			if(dropOnce==true && System.currentTimeMillis()>lastMove+SANITY_DROP_DELAY) {
+			if(dropOnce==false && System.currentTimeMillis()>lastMove+SANITY_DROP_DELAY) {
 				System.out.println("Automated sanity drop");
 				drop();
-				dropOnce=false;
+				dropOnce=true;
 			}
 		}
 	};
@@ -227,6 +231,7 @@ implements ActionListener, PropertyChangeListener  {
     	     
     	if(ignore==false) {
     		lastMove=System.currentTimeMillis();
+    		announceOnce=false;
     	}
     }
     
@@ -241,9 +246,12 @@ implements ActionListener, PropertyChangeListener  {
 			return true;  // does not start with right command.
 
 		boolean ignore=false;
-		float newX = XCarve.getX();
-		float newY = XCarve.getY();
-		float newA = Addon.getAngleDegrees();
+		float oldX = XCarve.getX();
+		float oldY = XCarve.getY();
+		float oldA = Addon.getAngleDegrees();
+		float newX = oldX;
+		float newY = oldY;
+		float newA = oldA;
 
 		StringTokenizer st = new StringTokenizer(message);
 		while(st.hasMoreTokens()) {
@@ -263,13 +271,15 @@ implements ActionListener, PropertyChangeListener  {
 		}
 		
 		if(ignore==false) {
-			if(!XCarve.isInBounds(newX, newY)) {
-				sendMessage(CHANNEL,""+newX +", "+newY+" is out of bounds.");
-			} else {
-				sendMessage(CHANNEL,"Moving to X"+newX +" Y"+newY+"...");
-				XCarve.moveAbsolute(newX, newY);
+			if(newX!=oldX && newY!=oldY) {
+				if(!XCarve.isInBounds(newX, newY)) {
+					sendMessage(CHANNEL,""+newX +", "+newY+" is out of bounds.");
+				} else {
+					sendMessage(CHANNEL,"Moving to X"+newX +" Y"+newY+"...");
+					XCarve.moveAbsolute(newX, newY);
+				}
 			}
-			if(newA != Addon.getAngleDegrees()) {
+			if(newA != oldA) {
 				sendMessage(CHANNEL,"Turning to A"+newA);
 				Addon.turnAbsolute(newA);
 			}
