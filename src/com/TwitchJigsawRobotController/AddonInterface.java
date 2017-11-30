@@ -192,6 +192,6 @@ public class AddonInterface implements SerialPortEventListener {
     	DecimalFormat df = new DecimalFormat();
     	df.setMaximumFractionDigits(2);
     	
-    	return new String(""+df.format(angleDegrees)+"deg"/* P"+p+" S"+s*/);
+    	return new String("A"+df.format(angleDegrees)/*+" P"+p+" S"+s*/);
     }
 }
