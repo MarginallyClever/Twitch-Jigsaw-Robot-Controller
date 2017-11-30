@@ -17,14 +17,14 @@ public class AddonInterface implements SerialPortEventListener {
     
 	private String serial_recv_buffer=new String();
     private SerialPort addonPort;
-    private int u,p,s;
+    private int angle,pumpOn,solenoidOn;
     private long lastReceivedTime;
     //private Timer disconnectTimer;
     
 	public AddonInterface() {
-		u=0;
-		p=0;
-		s=0;
+		angle=0;
+		pumpOn=0;
+		solenoidOn=0;
 	}
 	
 	protected void connect() throws Exception {
@@ -117,47 +117,54 @@ public class AddonInterface implements SerialPortEventListener {
 		}
     }
     
+    public boolean isPumpOn() {
+    	return pumpOn!=0;
+    }
+    
+    public boolean isSolenoidOn() {
+    	return solenoidOn==1;
+    }
+    
     public void pumpOn() {
-    	p=1;
+    	pumpOn=1;
     	send("P0");
     }
     
     public void pumpOff() {
-    	p=0;
+    	pumpOn=0;
     	send("P1");
     }
     
     public void pumpBlow() {
-    	p=2;
+    	pumpOn=2;
     	send("P2");
     }
     
     public void turnLeft() {
-    	u++;
+    	angle++;
     	send("R0");
     }
     
     public void turnRight() {
-    	
-    	u--;
+    	angle--;
     	send("R1");
     }
     
     public void solenoidOn() {
-    	s++;
+    	solenoidOn=1;
     	send("S1");
     }
     
     public void solenoidOff() {
-    	s--;
+    	solenoidOn=0;
     	send("S0");
     }
     
     public String where() {
-    	float angle = (float)(u%200) * (360.0f/200.0f);
+    	float angleDegrees = (float)(angle%200) * (360.0f/200.0f);
     	DecimalFormat df = new DecimalFormat();
     	df.setMaximumFractionDigits(2);
     	
-    	return new String(""+df.format(angle)+"deg"/* P"+p+" S"+s*/);
+    	return new String(""+df.format(angleDegrees)+"deg"/* P"+p+" S"+s*/);
     }
 }

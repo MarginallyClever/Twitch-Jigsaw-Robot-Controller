@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.StringTokenizer;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -219,7 +220,7 @@ implements ActionListener, PropertyChangeListener  {
     	//else if(message.equalsIgnoreCase("!help")) help(sender);
     	//else if(message.equalsIgnoreCase("!about")) help(sender);
     	else if(message.equalsIgnoreCase("!where")) where(sender);
-    	else ignore=true;
+    	else ignore=parseGo(message);;
     	// else ignore
     	     
     	if(ignore==false) {
@@ -227,6 +228,45 @@ implements ActionListener, PropertyChangeListener  {
     	}
     }
     
+	/**
+	 * Parse messages in the format "GO [Xnnn] [Ynnn]".  nnn is a float.  X and Y parts are optional.
+	 * @param message the string sent from the 
+	 * @return true if message was ignored.
+	 */
+	protected boolean parseGo(String message) {
+		String command="GO";
+		if(!message.startsWith(command))
+			return true;  // does not start with right command.
+
+		boolean ignore=false;
+		float newX = XCarve.getX();
+		float newY = XCarve.getY();
+
+		StringTokenizer st = new StringTokenizer(message);
+		while(st.hasMoreTokens()) {
+			String tok=st.nextToken();
+			
+			if(tok.startsWith("X")) {
+				newX = Float.parseFloat(tok.substring(1));
+			} else if(tok.startsWith("Y")) {
+				newY = Float.parseFloat(tok.substring(1));
+			} else if(tok.equals(command)){
+			} else {
+				// badly formed commands are ignored, even if some parts are OK.
+				ignore=true;
+			}
+		}
+		
+		if(ignore==false) {
+			if(XCarve.moveAbsolute(newX, newY)) {
+				sendMessage(CHANNEL,"Moving to "+newX +", "+newY+"...");
+			} else {
+				sendMessage(CHANNEL,""+newX +", "+newY+" is out of bounds.");
+			}
+		}
+		return ignore;
+	}
+	
     // https://discuss.dev.twitch.tv/t/sending-whispers-with-my-irc-bot/4346/20
     protected void privMessage(String sender,String msg) {
     	this.sendRawLineViaQueue("PRIVMSG "+CHANNEL+" :/w "+sender+" "+msg);

@@ -164,6 +164,26 @@ public class XCarveInterface implements SerialPortEventListener{
 	public void absoluteMode() {
 		send("G90");
 	}
+	
+	public float getX() { return x; }
+	public float getY() { return y; }
+
+	/**
+	 * move the robot to a new x,y.
+	 * @param newX
+	 * @param newY
+	 * @return false if out of bounds, true if move allowed.
+	 */
+    public boolean moveAbsolute(float newX,float newY) {
+    	if(newX>=0 && newX< MAX_X 
+    	&& newY>=0 && newY< MAX_Y) {
+    		x=newX;
+    		y=newY;
+    		send("G0 X"+x+" Y"+y);
+    		return true;
+    	}
+    	return false;  // out of bounds
+    }
     
     public void north() {
     	goEast();
