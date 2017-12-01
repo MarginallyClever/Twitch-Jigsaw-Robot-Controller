@@ -264,6 +264,8 @@ implements ActionListener, PropertyChangeListener  {
 					newY = Float.parseFloat(tok.substring(1));
 				} else if(tok.startsWith("A")) {
 					newA = Float.parseFloat(tok.substring(1));
+					if(newA<0) return true;
+					if(newA>360) return true;
 				} else if(tok.equals(command)){
 					// first item on string?  I don't care if someone writes "go go go x100 go"
 				} else {

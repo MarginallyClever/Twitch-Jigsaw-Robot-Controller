@@ -3,6 +3,8 @@ package com.TwitchJigsawRobotController;
 import java.text.DecimalFormat;
 import java.util.TimerTask;
 
+import org.junit.Test;
+
 import jssc.SerialPort;
 import jssc.SerialPortEvent;
 import jssc.SerialPortEventListener;
@@ -15,6 +17,7 @@ public class AddonInterface implements SerialPortEventListener {
     static long DISCONNECT_CLOCK_DELAY = 20000;
     static long DISCONNECT_TIMEOUT = 60000;
     static int STEPS_PER_TURN = 200;
+    static int HALF_STEPS_PER_TURN = STEPS_PER_TURN /2; 
     
 	private String serial_recv_buffer=new String();
     private SerialPort addonPort;
@@ -167,13 +170,20 @@ public class AddonInterface implements SerialPortEventListener {
     	return angleDegrees;
     }
     
+    static public int calculateShortestPath(int oldAngle,int newAngle) {
+    	int delta = newAngle - oldAngle;
+    	if(delta>0 &&          delta  > HALF_STEPS_PER_TURN) delta = STEPS_PER_TURN - delta;
+    	if(delta<0 && Math.abs(delta) > HALF_STEPS_PER_TURN) delta = STEPS_PER_TURN + delta;
+    	return delta;
+    }
+    
     public void turnAbsolute(float newAngleDegrees) {
-    	while(newAngleDegrees<0) newAngleDegrees+=360;
     	// convert degrees to motor steps
     	int newAngle = (int)( newAngleDegrees * (float)STEPS_PER_TURN / 360.0f );
-
+    	newAngle %= STEPS_PER_TURN;
+    	
     	// from here on all values are in motor steps.
-    	int delta = newAngle - angle;
+    	int delta = calculateShortestPath(angle,newAngle);    	
     	if(delta<0) {
     		delta=-delta;
     		for(int i=0;i<delta;++i) {
@@ -193,5 +203,42 @@ public class AddonInterface implements SerialPortEventListener {
     	df.setMaximumFractionDigits(2);
     	
     	return new String("A"+df.format(angleDegrees)/*+" P"+p+" S"+s*/);
+    }
+    
+    @Test
+    public void testShortestPath() {
+    	System.out.println("test when start<end and abs(end-start)<180");
+    	for(int start=0;start<STEPS_PER_TURN;++start) {
+        	for(int end=start;end<start+HALF_STEPS_PER_TURN;++end) {
+        		int result=calculateShortestPath(start,end);
+        		System.out.println("\t"+start+"\t"+end+"\t"+(end-start)+"\t"+result);
+        		assert(result>=0 && result<=HALF_STEPS_PER_TURN);
+        	}
+    	}
+    	System.out.println("test when start<end and abs(end-start)>=180");
+    	for(int start=0;start<STEPS_PER_TURN;++start) {
+        	for(int end=start+HALF_STEPS_PER_TURN;end<start+STEPS_PER_TURN;++end) {
+        		int result=calculateShortestPath(start,end);
+        		System.out.println("\t"+start+"\t"+end+"\t"+(end-start)+"\t"+result);
+        		assert(result<=0 && result>=-HALF_STEPS_PER_TURN);
+        	}
+    	}
+    	System.out.println("test when end<start and abs(end-start)<180");
+    	for(int start=0;start<STEPS_PER_TURN;++start) {
+        	for(int end=start;end>start-HALF_STEPS_PER_TURN;--end) {
+        		int result=calculateShortestPath(start,end);
+        		System.out.println("\t"+start+"\t"+end+"\t"+(end-start)+"\t"+result);
+        		assert(result<=0 && result>=-HALF_STEPS_PER_TURN);
+        	}
+    	}
+    	System.out.println("test when end<start and abs(end-start)>=180");
+    	for(int start=0;start<STEPS_PER_TURN;++start) {
+        	for(int end=start-HALF_STEPS_PER_TURN;end>start-STEPS_PER_TURN;--end) {
+        		int result=calculateShortestPath(start,end);
+        		System.out.println("\t"+start+"\t"+end+"\t"+(end-start)+"\t"+result);
+        		assert(result>=0 && result<=HALF_STEPS_PER_TURN);
+        	}
+    	}
+    	System.out.println("Test OK");
     }
 }

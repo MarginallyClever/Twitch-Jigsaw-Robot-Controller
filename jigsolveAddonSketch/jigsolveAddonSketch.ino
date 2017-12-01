@@ -86,8 +86,8 @@ void loop() {
         else if(msg[1]=='1') digitalWrite(SOLENOID_PIN,HIGH);  //solenoid.run(RELEASE );  // S1 = solenoid off
         //else if(msg[1]=='2') digitalWrite(SOLENOID_PIN,HIGH);  //solenoid.run(FORWARD );  // S2 = solenoid on
       } else if(msg[0]=='R') {
-             if(msg[1]=='0') stepper.step(1, FORWARD , SINGLE);  // R0 = turn Left
-        else if(msg[1]=='1') stepper.step(1, BACKWARD, SINGLE);  // R1 = turn right
+             if(msg[1]=='0') stepper.step(1, FORWARD , SINGLE);  // R0 = turn ccw
+        else if(msg[1]=='1') stepper.step(1, BACKWARD, SINGLE);  // R1 = turn cw
       }
       // restart
       bPos=0;
