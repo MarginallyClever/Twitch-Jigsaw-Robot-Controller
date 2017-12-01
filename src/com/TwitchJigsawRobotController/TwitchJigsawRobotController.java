@@ -241,11 +241,11 @@ implements ActionListener, PropertyChangeListener  {
 	 * @return true if message was ignored.
 	 */
 	protected boolean parseGo(String message) {
+		// check if input is sane and parse values
 		String command="GO";
 		if(!message.startsWith(command))
 			return true;  // does not start with right command.
 
-		boolean ignore=false;
 		float oldX = XCarve.getX();
 		float oldY = XCarve.getY();
 		float oldA = Addon.getAngleDegrees();
@@ -257,34 +257,39 @@ implements ActionListener, PropertyChangeListener  {
 		while(st.hasMoreTokens()) {
 			String tok=st.nextToken();
 			
-			if(tok.startsWith("X")) {
-				newX = Float.parseFloat(tok.substring(1));
-			} else if(tok.startsWith("Y")) {
-				newY = Float.parseFloat(tok.substring(1));
-			} else if(tok.startsWith("A")) {
-				newA = Float.parseFloat(tok.substring(1));
-			} else if(tok.equals(command)){
-			} else {
-				// badly formed commands are ignored, even if some parts are OK.
-				ignore=true;
+			try {
+				if(tok.startsWith("X")) {
+					newX = Float.parseFloat(tok.substring(1));
+				} else if(tok.startsWith("Y")) {
+					newY = Float.parseFloat(tok.substring(1));
+				} else if(tok.startsWith("A")) {
+					newA = Float.parseFloat(tok.substring(1));
+				} else if(tok.equals(command)){
+					// first item on string?  I don't care if someone writes "go go go x100 go"
+				} else {
+					// badly formed commands are ignored, even if some parts are OK.
+					return true;
+				}
+			} catch(NumberFormatException e) {
+				return true;
 			}
 		}
 		
-		if(ignore==false) {
-			if(newX!=oldX && newY!=oldY) {
-				if(!XCarve.isInBounds(newX, newY)) {
-					sendMessage(CHANNEL,""+newX +", "+newY+" is out of bounds.");
-				} else {
-					sendMessage(CHANNEL,"Moving to X"+newX +" Y"+newY+"...");
-					XCarve.moveAbsolute(newX, newY);
-				}
-			}
-			if(newA != oldA) {
-				sendMessage(CHANNEL,"Turning to A"+newA);
-				Addon.turnAbsolute(newA);
+		// input looks sane
+		if(newX!=oldX && newY!=oldY) {
+			if(!XCarve.isInBounds(newX, newY)) {
+				sendMessage(CHANNEL,""+newX +", "+newY+" is out of bounds.");
+			} else {
+				sendMessage(CHANNEL,"Moving to X"+newX +" Y"+newY+"...");
+				XCarve.moveAbsolute(newX, newY);
 			}
 		}
-		return ignore;
+		if(newA != oldA) {
+			sendMessage(CHANNEL,"Turning to A"+newA);
+			Addon.turnAbsolute(newA);
+		}
+		
+		return false;
 	}
 	
     // https://discuss.dev.twitch.tv/t/sending-whispers-with-my-irc-bot/4346/20
