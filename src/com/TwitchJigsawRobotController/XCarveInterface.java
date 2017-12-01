@@ -21,7 +21,7 @@ public class XCarveInterface implements SerialPortEventListener{
 	static float MIN_Y = 0;   // mm
 	static float MAX_Z = 0;  // mm
 	static float MIN_Z = -80;   // mm
-    
+    static float FEED_RATE = 250;  // mm
 	private String serial_recv_buffer=new String();
 	private SerialPort xCarvePort;
     private float x,y,z;
@@ -168,6 +168,12 @@ public class XCarveInterface implements SerialPortEventListener{
 	public float getX() { return x; }
 	public float getY() { return y; }
 
+	/**
+	 * is the coordinate within limits?
+	 * @param newX in mm
+	 * @param newY in mm
+	 * @return true if in limits.
+	 */
 	public boolean isInBounds(float newX,float newY) {
 		return (newX>=0 && newX< MAX_X 
 			 && newY>=0 && newY< MAX_Y);
@@ -186,27 +192,41 @@ public class XCarveInterface implements SerialPortEventListener{
 		x=newX;
 		y=newY;
 		absoluteMode();
-		send("G0 X"+x+" Y"+y+" F500");
+		send("G0 X"+x+" Y"+y+" F"+FEED_RATE);
 		relativeMode();
 		
 		return true;
     }
     
+    /**
+     * move X+1
+     */
     public void north() {
     	goEast();
     }
     
+    /**
+     * move X-1
+     */
     public void south() {
     	goWest();
     }
+
+    /**
+     * move Y-1
+     */
     public void east() {
     	goSouth();
     }
     
+    /**
+     * move Y+1
+     */
     public void west() {
     	goNorth();
     }
 
+    
     protected void goNorth() {
     	if(y>=MAX_Y) return;
     	++y;
