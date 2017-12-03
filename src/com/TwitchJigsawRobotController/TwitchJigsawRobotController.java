@@ -20,6 +20,7 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 import org.jibble.pircbot.*;
+import org.junit.Test;
 
 public class TwitchJigsawRobotController 
 extends PircBot
@@ -226,7 +227,7 @@ implements ActionListener, PropertyChangeListener  {
     	//else if(message.equalsIgnoreCase("!help")) help(sender);
     	//else if(message.equalsIgnoreCase("!about")) help(sender);
     	else if(message.equalsIgnoreCase("!where")) where(sender);
-    	else ignore=parseGo(message);;
+    	else ignore=parseGo(message);
     	// else ignore
     	     
     	if(ignore==false) {
@@ -259,11 +260,11 @@ implements ActionListener, PropertyChangeListener  {
 			
 			try {
 				if(tok.startsWith("X")) {
-					newX = Float.parseFloat(tok.substring(1));
+					newX = getValueFromToken(tok);
 				} else if(tok.startsWith("Y")) {
-					newY = Float.parseFloat(tok.substring(1));
+					newY = getValueFromToken(tok);
 				} else if(tok.startsWith("A")) {
-					newA = Float.parseFloat(tok.substring(1));
+					newA = getValueFromToken(tok);
 					if(newA<0) return true;
 					if(newA>360) return true;
 				} else if(tok.equals(command)){
@@ -294,6 +295,50 @@ implements ActionListener, PropertyChangeListener  {
 		return false;
 	}
 	
+	protected char getLetterFromToken(String token) {
+		return token.charAt(0);
+	}
+	protected float getValueFromToken(String token) throws NumberFormatException {
+		float x;
+		try {
+			x = Float.parseFloat(token.substring(1));
+		} catch(NumberFormatException e) {
+			System.out.println("Bad format for: "+token);
+			throw e;
+		}
+		return x;		
+	}
+	
+	@Test
+	public void testValueFromToken() {
+		System.out.println("testValueFromToken()");
+		try {
+			assert(getValueFromToken("X100") == 100);
+			assert(getValueFromToken("Y-20") == -20);
+			assert(getValueFromToken("Z1.0E25") == 1.0E25);
+			assert(getValueFromToken("W361.0") == 361);
+		} catch( NumberFormatException e) {
+			assert(false);
+		}
+		try {
+			// will throw assert
+			getValueFromToken("W361.0andsomethingbreaks");
+			assert(false);
+		} catch( NumberFormatException e) {
+			assert(true);
+		}
+
+		try {
+			// will throw assert
+			getValueFromToken("abcd-0andsomethingbreaks");
+			assert(false);
+		} catch( NumberFormatException e) {
+			assert(true);
+		}
+		System.out.println("testValueFromToken() complete.");
+	}
+	
+	
     // https://discuss.dev.twitch.tv/t/sending-whispers-with-my-irc-bot/4346/20
     protected void privMessage(String sender,String msg) {
     	this.sendRawLineViaQueue("PRIVMSG "+CHANNEL+" :/w "+sender+" "+msg);
@@ -315,24 +360,31 @@ implements ActionListener, PropertyChangeListener  {
     }
     
     protected void north() {
+    	sendMessage(CHANNEL,"North");
     	XCarve.north();
     }
     protected void south() {
+    	sendMessage(CHANNEL,"South");
     	XCarve.south();
     }
     protected void east() {
+    	sendMessage(CHANNEL,"East");
     	XCarve.east();
     }
     protected void west() {
+    	sendMessage(CHANNEL,"West");
     	XCarve.west();
     }
     protected void left() {
+    	sendMessage(CHANNEL,"Left");
     	Addon.turnRight();
     }
     protected void right() {
+    	sendMessage(CHANNEL,"Right");
     	Addon.turnLeft();
     }
     protected void drop() {
+    	sendMessage(CHANNEL,"Dropping...");
 		XCarve.down();
 		pause(10000);
 		Addon.pumpOff();
@@ -343,6 +395,7 @@ implements ActionListener, PropertyChangeListener  {
     }
 
     protected void pick() {
+    	sendMessage(CHANNEL,"Picking...");
 		XCarve.down();
 		pause(10000);
 		Addon.pumpOn();
