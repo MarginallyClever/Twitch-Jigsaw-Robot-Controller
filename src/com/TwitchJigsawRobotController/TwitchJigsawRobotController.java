@@ -257,12 +257,13 @@ implements ActionListener, PropertyChangeListener  {
 		boolean looksSane = analyzeMessage(message);
 		if(!looksSane) return true;
 		
+		// input looks sane
 		float newX = goCommandValues[0];
 		float newY = goCommandValues[1];
 		float newA = goCommandValues[2];
-
-		// input looks sane
-		if(newX!=oldX && newY!=oldY) {
+		
+		if(newX!=oldX || newY!=oldY) {
+			// new command actually moves to a new place
 			if(!XCarve.isInBounds(newX, newY)) {
 				sendMessage(CHANNEL,"X"+newX +" Y"+newY+" is out of bounds.");
 			} else {
@@ -271,6 +272,7 @@ implements ActionListener, PropertyChangeListener  {
 			}
 		}
 		if(newA != oldA) {
+			// new command actually moves to a new place
 			if(newA<0 || newA>360) {
 				sendMessage(CHANNEL,"A"+newA+" is out of bounds.");
 			} else {
