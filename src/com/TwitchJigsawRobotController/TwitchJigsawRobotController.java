@@ -45,8 +45,8 @@ implements ActionListener, PropertyChangeListener  {
 	protected JButton bNorth,bSouth,bEast,bWest,bPick,bDrop,bLeft,bRight;
     
 	private long lastMove;
-    private boolean dropOnce;
     private boolean announceOnce;
+    private boolean isPickedUp;
     
     protected float [] goCommandValues = new float[3];
 
@@ -73,7 +73,7 @@ implements ActionListener, PropertyChangeListener  {
 		setupDialog();
 		lastMove=System.currentTimeMillis();
 		announceOnce=false;
-		dropOnce=false;
+		isPickedUp=false;
 	}
 	
 	
@@ -132,13 +132,11 @@ implements ActionListener, PropertyChangeListener  {
 			if(announceOnce==false && System.currentTimeMillis()>lastMove+ANNOUNCE_DELAY) {
 				// announce the location of the robot
 				where(CHANNEL);
-				dropOnce=false;
 				announceOnce=true;
 			} 
-			if(dropOnce==false && System.currentTimeMillis()>lastMove+SANITY_DROP_DELAY) {
+			if(isPickedUp==true && System.currentTimeMillis()>lastMove+SANITY_DROP_DELAY) {
 				System.out.println("Automated sanity drop");
 				drop();
-				dropOnce=true;
 			}
 		}
 	};
@@ -486,6 +484,7 @@ implements ActionListener, PropertyChangeListener  {
 		pause(1500);
 		Addon.solenoidOff();
 		XCarve.up();
+		isPickedUp=false;
     }
 
     protected void pick() {
@@ -495,6 +494,7 @@ implements ActionListener, PropertyChangeListener  {
 		Addon.pumpOn();
 		pause(1000);
 		XCarve.up();
+		isPickedUp=true;
     }
     
     protected void pause(long millis) {
