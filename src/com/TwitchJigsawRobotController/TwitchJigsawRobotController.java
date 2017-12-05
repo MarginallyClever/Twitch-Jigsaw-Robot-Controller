@@ -47,6 +47,8 @@ implements ActionListener, PropertyChangeListener  {
 	private long lastMove;
     private boolean dropOnce;
     private boolean announceOnce;
+    
+    protected float [] goCommandValues = new float[3];
 
     
 	public static void main(String[] argv) throws Exception {
@@ -250,17 +252,16 @@ implements ActionListener, PropertyChangeListener  {
 		if(!message.startsWith(MOVE_COMMAND))
 			return true;  // does not start with right command.
 
-		float oldX = XCarve.getX();
-		float oldY = XCarve.getY();
-		float oldA = Addon.getAngleDegrees();
-		float [] values = { oldX,oldY,oldA };
+		float oldX = goCommandValues[0] = XCarve.getX();
+		float oldY = goCommandValues[1] = XCarve.getY();
+		float oldA = goCommandValues[2] = Addon.getAngleDegrees();
 
-		boolean looksSane = analyzeMessage(message,values);
+		boolean looksSane = analyzeMessage(message);
 		if(!looksSane) return true;
 		
-		float newX = values[0];
-		float newY = values[0];
-		float newA = values[0];
+		float newX = goCommandValues[0];
+		float newY = goCommandValues[1];
+		float newA = goCommandValues[2];
 
 		// input looks sane
 		if(newX!=oldX && newY!=oldY) {
@@ -286,19 +287,18 @@ implements ActionListener, PropertyChangeListener  {
 	/**
 	 * 
 	 * @param message
-	 * @param values
 	 * @return true if message is sane
 	 */
-	protected boolean analyzeMessage(String message,float [] values) {
+	protected boolean analyzeMessage(String message) {
 		StringTokenizer st = new StringTokenizer(message);
 		while(st.hasMoreTokens()) {
 			String tok=st.nextToken();
 			
 			try {
 					 if(tok.equals(MOVE_COMMAND)) ;	// first item on string?  I don't care if someone writes "go go go x100 go"
-				else if(tok.startsWith("X")) values[0] = getValueFromToken(tok);
-				else if(tok.startsWith("Y")) values[1] = getValueFromToken(tok);
-				else if(tok.startsWith("A")) values[2] = getValueFromToken(tok);
+				else if(tok.startsWith("X")) goCommandValues[0] = getValueFromToken(tok);
+				else if(tok.startsWith("Y")) goCommandValues[1] = getValueFromToken(tok);
+				else if(tok.startsWith("A")) goCommandValues[2] = getValueFromToken(tok);
 				else  {
 					// badly formed commands are ignored, even if some parts are OK.
 					return false;
@@ -321,6 +321,7 @@ implements ActionListener, PropertyChangeListener  {
 	@Test
 	public void testAnalyzeMessage() {
 		System.out.println("testAnalyzeMessage() Begin");
+		System.out.println("test full message");
 		for(int i=0;i<1000;++i) {
 			float x = newRandomFloat(XCarveInterface.MIN_X,XCarveInterface.MAX_X);
 			float y = newRandomFloat(XCarveInterface.MIN_Y,XCarveInterface.MAX_Y);
@@ -328,12 +329,61 @@ implements ActionListener, PropertyChangeListener  {
 			String message = MOVE_COMMAND+" X"+x+" Y"+y+" A"+a;
 			System.out.println(message);
 			
-			float [] values = {0,0,0};
-			assert(analyzeMessage(message,values));
-			assert(fuzzyEquals(values[0],x));
-			assert(fuzzyEquals(values[1],y));
-			assert(fuzzyEquals(values[2],a));
+			goCommandValues[0]=x;
+			goCommandValues[1]=y;
+			goCommandValues[2]=a;
+			assert(analyzeMessage(message));
+			System.out.println(goCommandValues[0] + " "+goCommandValues[1]+" "+goCommandValues[2]);
+			assert(fuzzyEquals(goCommandValues[0],x));
+			assert(fuzzyEquals(goCommandValues[1],y));
+			assert(fuzzyEquals(goCommandValues[2],a));
 		}
+
+		System.out.println("test only x");
+		for(int i=0;i<1000;++i) {
+			float x = newRandomFloat(XCarveInterface.MIN_X,XCarveInterface.MAX_X);
+			String message = MOVE_COMMAND+" X"+x;
+			System.out.println(message);
+
+			goCommandValues[0]=x;
+			goCommandValues[1]=0;
+			goCommandValues[2]=0;
+			assert(analyzeMessage(message));
+			assert(fuzzyEquals(goCommandValues[0],x));
+			assert(fuzzyEquals(goCommandValues[1],0));
+			assert(fuzzyEquals(goCommandValues[2],0));
+		}
+
+		System.out.println("test only y");
+		for(int i=0;i<1000;++i) {
+			float y = newRandomFloat(XCarveInterface.MIN_Y,XCarveInterface.MAX_Y);
+			String message = MOVE_COMMAND+" Y"+y;
+			System.out.println(message);
+
+			goCommandValues[0]=0;
+			goCommandValues[1]=y;
+			goCommandValues[2]=0;
+			assert(analyzeMessage(message));
+			assert(fuzzyEquals(goCommandValues[0],0));
+			assert(fuzzyEquals(goCommandValues[1],y));
+			assert(fuzzyEquals(goCommandValues[2],0));
+		}
+		
+		System.out.println("test only a");
+		for(int i=0;i<1000;++i) {
+			float a = newRandomFloat(AddonInterface.MIN_A,AddonInterface.MAX_A);
+			String message = MOVE_COMMAND+" A"+a;
+			System.out.println(message);
+
+			goCommandValues[0]=0;
+			goCommandValues[1]=0;
+			goCommandValues[2]=a;
+			assert(analyzeMessage(message));
+			assert(fuzzyEquals(goCommandValues[0],0));
+			assert(fuzzyEquals(goCommandValues[1],0));
+			assert(fuzzyEquals(goCommandValues[2],a));
+		}
+		
 		System.out.println("testAnalyzeMessage() OK");
 	}
 	
