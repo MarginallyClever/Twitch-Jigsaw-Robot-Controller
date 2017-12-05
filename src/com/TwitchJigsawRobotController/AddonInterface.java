@@ -113,7 +113,7 @@ public class AddonInterface implements SerialPortEventListener {
 	}
 
 
-    protected void send(String msg) {
+    protected void sendToArduino(String msg) {
 		try {
 			if(!msg.endsWith("\n")) {
 				msg+="\n";
@@ -137,37 +137,37 @@ public class AddonInterface implements SerialPortEventListener {
     
     public void pumpOn() {
     	pumpOn=1;
-    	send("P0");
+    	sendToArduino("P0");
     }
     
     public void pumpOff() {
     	pumpOn=0;
-    	send("P1");
+    	sendToArduino("P1");
     }
     
     public void pumpBlow() {
     	pumpOn=2;
-    	send("P2");
+    	sendToArduino("P2");
     }
     
     public void turnLeft() {
     	angle= (angle + STEPS_PER_TURN +1 ) % STEPS_PER_TURN;
-    	send("R0");
+    	sendToArduino("R0");
     }
     
     public void turnRight() {
     	angle= (angle + STEPS_PER_TURN -1 ) % STEPS_PER_TURN;
-    	send("R1");
+    	sendToArduino("R1");
     }
     
     public void solenoidOn() {
     	solenoidOn=1;
-    	send("S1");
+    	sendToArduino("S1");
     }
     
     public void solenoidOff() {
     	solenoidOn=0;
-    	send("S0");
+    	sendToArduino("S0");
     }
     
     public float getAngleDegrees() {

@@ -301,6 +301,7 @@ implements ActionListener, PropertyChangeListener  {
 				else if(tok.startsWith("A")) goCommandValues[2] = getValueFromToken(tok);
 				else  {
 					// badly formed commands are ignored, even if some parts are OK.
+					sendMessage(CHANNEL,"I don't know what '"+tok+"' means.");
 					return false;
 				}
 			} catch(NumberFormatException e) {

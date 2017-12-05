@@ -23,7 +23,7 @@ public class XCarveInterface implements SerialPortEventListener{
 	static float MIN_Y = 0;   // mm
 	static float MAX_Z = 0;  // mm
 	static float MIN_Z = -80;   // mm
-    static float FEED_RATE = 250;  // mm
+    static float FEED_RATE = 125;  // mm
 	private String serial_recv_buffer=new String();
 	private SerialPort xCarvePort;
     private float x,y,z;
@@ -125,7 +125,7 @@ public class XCarveInterface implements SerialPortEventListener{
 	}
 
 	
-    protected void send(String msg) {
+    protected void sendToXCarve(String msg) {
 		try {
 			if(!msg.endsWith("\n")) {
 				msg+="\n";
@@ -140,14 +140,14 @@ public class XCarveInterface implements SerialPortEventListener{
     
 	
 	public void goHome() {
-        send("$H");
+        sendToXCarve("$H");
 	}
 
 
 	public void startupInstructions() {
         goHome();
         setPosition(0,0,0);  // make sure it knows it is at 0,0,0
-        send("G54");  // default coordinate system
+        sendToXCarve("G54");  // default coordinate system
         relativeMode();
         
         System.out.println("initialized X-Carve");
@@ -157,15 +157,15 @@ public class XCarveInterface implements SerialPortEventListener{
 		x=_x;
 		y=_y;
 		z=_z;
-        send("G92 X"+x+" Y"+y+" Z"+z);
+        sendToXCarve("G92 X"+x+" Y"+y+" Z"+z);
 	}
 	
 	public void relativeMode() {
-        send("G91");  // relative mode
+        sendToXCarve("G91");  // relative mode
 	}
 
 	public void absoluteMode() {
-		send("G90");
+		sendToXCarve("G90");
 	}
 	
 	public float getX() { return x; }
@@ -195,7 +195,7 @@ public class XCarveInterface implements SerialPortEventListener{
 		x=newX;
 		y=newY;
 		absoluteMode();
-		send("G0 X"+x+" Y"+y+" F"+FEED_RATE);
+		sendToXCarve("G0 X"+x+" Y"+y+" F"+FEED_RATE);
 		relativeMode();
 		
 		return true;
@@ -233,31 +233,31 @@ public class XCarveInterface implements SerialPortEventListener{
     protected void goNorth() {
     	if(y>=MAX_Y) return;
     	++y;
-    	send("G0 Y+1");
+    	sendToXCarve("G0 Y+1");
     }
     
     protected void goSouth() {
     	if(y<=MIN_Y) return;
     	--y;
-    	send("G0 Y-1");
+    	sendToXCarve("G0 Y-1");
     }
     protected void goEast() {
     	if(x>=MAX_X) return;
     	++x;
-    	send("G0 X+1");
+    	sendToXCarve("G0 X+1");
     }
     
     protected void goWest() {
     	if(x<=MIN_X) return;
     	--x;
-    	send("G0 X-1");
+    	sendToXCarve("G0 X-1");
     }
 
     public void up() {
     	if(z != MIN_Z) return;
     	z=MAX_Z;
     	absoluteMode();
-    	send("G0 Z"+MAX_Z);
+    	sendToXCarve("G0 Z"+MAX_Z);
     	relativeMode();
     }
     
@@ -265,7 +265,7 @@ public class XCarveInterface implements SerialPortEventListener{
     	if(z!=MAX_Z) return;
     	z=MIN_Z;
     	absoluteMode();
-    	send("G0 Z"+MIN_Z);
+    	sendToXCarve("G0 Z"+MIN_Z);
     	relativeMode();
     }
     
