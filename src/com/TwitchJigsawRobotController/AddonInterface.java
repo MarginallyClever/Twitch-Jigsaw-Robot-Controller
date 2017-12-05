@@ -3,6 +3,8 @@ package com.TwitchJigsawRobotController;
 import java.text.DecimalFormat;
 import java.util.TimerTask;
 
+import javax.swing.JOptionPane;
+
 import org.junit.Test;
 
 import jssc.SerialPort;
@@ -18,6 +20,8 @@ public class AddonInterface implements SerialPortEventListener {
     static long DISCONNECT_TIMEOUT = 60000;
     static int STEPS_PER_TURN = 200;
     static int HALF_STEPS_PER_TURN = STEPS_PER_TURN /2; 
+    static float MIN_A = 0;
+    static float MAX_A = 360;
     
 	private String serial_recv_buffer=new String();
     private SerialPort addonPort;
@@ -42,6 +46,8 @@ public class AddonInterface implements SerialPortEventListener {
 		} catch (SerialPortException e) {
 			// TODO Auto-generated catch block
 			//e.printStackTrace();
+			JOptionPane.showMessageDialog(null, "I cannot connect to the Addon.  Is it on?  is it connected?  More information may be available in the Eclipse stack trace error message.","Error",JOptionPane.ERROR_MESSAGE);
+
 			throw e;
 		}
         System.out.println("Connected to Addon");

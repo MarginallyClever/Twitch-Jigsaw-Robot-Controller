@@ -2,6 +2,8 @@ package com.TwitchJigsawRobotController;
 
 import java.util.TimerTask;
 
+import javax.swing.JOptionPane;
+
 import jssc.SerialPort;
 import jssc.SerialPortEvent;
 import jssc.SerialPortEventListener;
@@ -46,6 +48,7 @@ public class XCarveInterface implements SerialPortEventListener{
 		} catch (SerialPortException e) {
 			// TODO Auto-generated catch block
 			//e.printStackTrace();
+			JOptionPane.showMessageDialog(null, "I cannot connect to the XCarve.  Is it on?  is it connected?  More information may be available in the Eclipse stack trace error message.","Error",JOptionPane.ERROR_MESSAGE);
 			throw e;
 		}
         try {

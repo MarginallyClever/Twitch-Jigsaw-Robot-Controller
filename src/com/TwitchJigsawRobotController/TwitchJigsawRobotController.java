@@ -17,6 +17,7 @@ import java.util.TimerTask;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 import org.jibble.pircbot.*;
@@ -32,6 +33,7 @@ implements ActionListener, PropertyChangeListener  {
     static public String PASSWORD = "oauth:j1xd8duzvlhuov9yczcrxgmo1eym3m";
 	static public long ANNOUNCE_DELAY = 60000; // ms
 	static public long SANITY_DROP_DELAY = 120000; // ms
+	static public String MOVE_COMMAND = "GO";
 	
 	private XCarveInterface XCarve;
     private AddonInterface Addon;
@@ -183,10 +185,12 @@ implements ActionListener, PropertyChangeListener  {
 	        	System.out.println("Named used.  Trying "+nameRoot+extra);
 	        }
 	        catch(IrcException e) {
+				JOptionPane.showMessageDialog(null, "I failed to connect to Twitch IRC.  It's an IRC problem.","Error",JOptionPane.ERROR_MESSAGE);
 	        	e.printStackTrace();
 	        	throw e;
 	        }
 	        catch(IOException e) {
+				JOptionPane.showMessageDialog(null, "I failed to connect to Twitch IRC.  It's an IO problem.","Error",JOptionPane.ERROR_MESSAGE);
 	        	e.printStackTrace();
 	        	throw e;
 	        }
@@ -243,61 +247,100 @@ implements ActionListener, PropertyChangeListener  {
 	 */
 	protected boolean parseGo(String message) {
 		// check if input is sane and parse values
-		String command="GO";
-		if(!message.startsWith(command))
+		if(!message.startsWith(MOVE_COMMAND))
 			return true;  // does not start with right command.
 
 		float oldX = XCarve.getX();
 		float oldY = XCarve.getY();
 		float oldA = Addon.getAngleDegrees();
-		float newX = oldX;
-		float newY = oldY;
-		float newA = oldA;
+		float [] values = { oldX,oldY,oldA };
 
-		StringTokenizer st = new StringTokenizer(message);
-		while(st.hasMoreTokens()) {
-			String tok=st.nextToken();
-			
-			try {
-				if(tok.startsWith("X")) {
-					newX = getValueFromToken(tok);
-				} else if(tok.startsWith("Y")) {
-					newY = getValueFromToken(tok);
-				} else if(tok.startsWith("A")) {
-					newA = getValueFromToken(tok);
-					if(newA<0) return true;
-					if(newA>360) return true;
-				} else if(tok.equals(command)){
-					// first item on string?  I don't care if someone writes "go go go x100 go"
-				} else {
-					// badly formed commands are ignored, even if some parts are OK.
-					return true;
-				}
-			} catch(NumberFormatException e) {
-				return true;
-			}
-		}
+		boolean looksSane = analyzeMessage(message,values);
+		if(!looksSane) return true;
 		
+		float newX = values[0];
+		float newY = values[0];
+		float newA = values[0];
+
 		// input looks sane
 		if(newX!=oldX && newY!=oldY) {
 			if(!XCarve.isInBounds(newX, newY)) {
-				sendMessage(CHANNEL,""+newX +", "+newY+" is out of bounds.");
+				sendMessage(CHANNEL,"X"+newX +" Y"+newY+" is out of bounds.");
 			} else {
 				sendMessage(CHANNEL,"Moving to X"+newX +" Y"+newY+"...");
 				XCarve.moveAbsolute(newX, newY);
 			}
 		}
 		if(newA != oldA) {
-			sendMessage(CHANNEL,"Turning to A"+newA);
-			Addon.turnAbsolute(newA);
+			if(newA<0 || newA>360) {
+				sendMessage(CHANNEL,"A"+newA+" is out of bounds.");
+			} else {
+				sendMessage(CHANNEL,"Turning to A"+newA);
+				Addon.turnAbsolute(newA);
+			}
 		}
 		
 		return false;
 	}
 	
+	/**
+	 * 
+	 * @param message
+	 * @param values
+	 * @return true if message is sane
+	 */
+	protected boolean analyzeMessage(String message,float [] values) {
+		StringTokenizer st = new StringTokenizer(message);
+		while(st.hasMoreTokens()) {
+			String tok=st.nextToken();
+			
+			try {
+					 if(tok.equals(MOVE_COMMAND)) ;	// first item on string?  I don't care if someone writes "go go go x100 go"
+				else if(tok.startsWith("X")) values[0] = getValueFromToken(tok);
+				else if(tok.startsWith("Y")) values[1] = getValueFromToken(tok);
+				else if(tok.startsWith("A")) values[2] = getValueFromToken(tok);
+				else  {
+					// badly formed commands are ignored, even if some parts are OK.
+					return false;
+				}
+			} catch(NumberFormatException e) {
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	protected float newRandomFloat(float min,float max) {
+		return min + (float)Math.random() * (max-min);
+	}
+	
+	protected boolean fuzzyEquals(double a, double b) {
+	    return Math.abs(a - b) < 0.000001 * Math.max(Math.abs(a), Math.abs(b));
+	}
+	
+	@Test
+	public void testAnalyzeMessage() {
+		System.out.println("testAnalyzeMessage() Begin");
+		for(int i=0;i<1000;++i) {
+			float x = newRandomFloat(XCarveInterface.MIN_X,XCarveInterface.MAX_X);
+			float y = newRandomFloat(XCarveInterface.MIN_Y,XCarveInterface.MAX_Y);
+			float a = newRandomFloat(AddonInterface.MIN_A,AddonInterface.MAX_A);
+			String message = MOVE_COMMAND+" X"+x+" Y"+y+" A"+a;
+			System.out.println(message);
+			
+			float [] values = {0,0,0};
+			assert(analyzeMessage(message,values));
+			assert(fuzzyEquals(values[0],x));
+			assert(fuzzyEquals(values[1],y));
+			assert(fuzzyEquals(values[2],a));
+		}
+		System.out.println("testAnalyzeMessage() OK");
+	}
+	
 	protected char getLetterFromToken(String token) {
 		return token.charAt(0);
 	}
+	
 	protected float getValueFromToken(String token) throws NumberFormatException {
 		float x;
 		try {
