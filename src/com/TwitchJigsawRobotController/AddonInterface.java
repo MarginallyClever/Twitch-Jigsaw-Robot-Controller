@@ -176,6 +176,11 @@ public class AddonInterface implements SerialPortEventListener {
     	return angleDegrees;
     }
     
+    public int convertDegreesToSteps(float degrees) {
+    	int steps = (int)( degrees * (float)STEPS_PER_TURN / 360.0f ) % STEPS_PER_TURN;
+    	return steps;
+    }
+    
     static public int calculateShortestPath(int oldAngle,int newAngle) {
     	int delta = newAngle - oldAngle;
     	if(delta>0 &&          delta  > HALF_STEPS_PER_TURN) delta = STEPS_PER_TURN - delta;
@@ -185,8 +190,8 @@ public class AddonInterface implements SerialPortEventListener {
     
     public void turnAbsolute(float newAngleDegrees) {
     	// convert degrees to motor steps
-    	int newAngle = (int)( newAngleDegrees * (float)STEPS_PER_TURN / 360.0f );
-    	newAngle %= STEPS_PER_TURN;
+    	int newAngle = convertDegreesToSteps(newAngleDegrees);
+    	if(newAngle==angle) return;
     	
     	// from here on all values are in motor steps.
     	int delta = calculateShortestPath(angle,newAngle);    	

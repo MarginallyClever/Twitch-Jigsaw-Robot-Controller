@@ -4,9 +4,11 @@ import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.image.BufferedImage;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
@@ -15,11 +17,17 @@ import java.util.StringTokenizer;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import javax.imageio.ImageIO;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
+import org.bytedeco.javacpp.opencv_core.Mat;
+import org.bytedeco.javacpp.opencv_videoio.VideoCapture;
+import org.bytedeco.javacv.Frame;
+import org.bytedeco.javacv.Java2DFrameConverter;
+import org.bytedeco.javacv.OpenCVFrameConverter;
 import org.jibble.pircbot.*;
 import org.junit.Test;
 
@@ -42,7 +50,7 @@ implements ActionListener, PropertyChangeListener  {
     
     protected JFrame frame;
     protected JPanel panel;
-	protected JButton bNorth,bSouth,bEast,bWest,bPick,bDrop,bLeft,bRight;
+	protected JButton bNorth,bSouth,bEast,bWest,bPick,bDrop,bLeft,bRight,bCapture;
     
 	private long lastMove;
     private boolean announceOnce;
@@ -92,17 +100,19 @@ implements ActionListener, PropertyChangeListener  {
 		bDrop  = new JButton("Drop");
 		bLeft  = new JButton("CCW");
 		bRight = new JButton("CW");
+		bCapture  = new JButton("Capture");
 
 		panel.add(bLeft);
 		panel.add(bNorth);
 		panel.add(bRight);
 		panel.add(bWest);
-		panel.add(new JButton(" "));
+		panel.add(bCapture);
 		panel.add(bEast);
 		panel.add(bPick);
 		panel.add(bSouth);
 		panel.add(bDrop);
 		
+		bCapture.addActionListener(this);
 		bNorth.addActionListener(this);
 		bSouth.addActionListener(this);
 		bWest.addActionListener(this);
@@ -271,18 +281,46 @@ implements ActionListener, PropertyChangeListener  {
 				XCarve.moveAbsolute(newX, newY);
 			}
 		}
-		if(newA != oldA) {
+		if(Addon.convertDegreesToSteps(newA) != Addon.convertDegreesToSteps(oldA)) {
 			// new command actually moves to a new place
 			if(newA<0 || newA>360) {
 				sendMessage(CHANNEL,"A"+newA+" is out of bounds.");
 			} else {
-				sendMessage(CHANNEL,"Turning to A"+newA);
+				sendMessage(CHANNEL,"Turning from A"+oldA+" to A"+newA);
 				Addon.turnAbsolute(newA);
 			}
 		}
 		
 		return false;
 	}
+    
+    public void captureFrame() {
+    	System.out.println("captureFrame() begin");
+    	VideoCapture cap = new VideoCapture();
+    	cap.open("http://192.168.0.100:12345/?action=stream");
+    	if(cap.isOpened()) {
+        	System.out.println("stream open");
+    		Mat mat = new Mat();
+    		if(cap.read(mat)) {
+    			System.out.println("frame read");
+
+    			Java2DFrameConverter frameToImage = new Java2DFrameConverter();
+    			OpenCVFrameConverter.ToMat matToFrame = new OpenCVFrameConverter.ToMat();
+    			
+    			Frame frame = matToFrame.convert(mat);
+    			BufferedImage image = frameToImage.convert(frame);
+    			try {
+    				File outputfile = new File("saved.jpg");
+    			    ImageIO.write(image, "jpg", outputfile);	
+    				System.out.println("Frame written");
+    			} catch(Exception e) {
+    				e.printStackTrace();
+    			}
+    		}
+    		cap.close();
+    	}
+    	System.out.println("captureFrame() end");
+    }
 	
 	/**
 	 * 
@@ -516,6 +554,7 @@ implements ActionListener, PropertyChangeListener  {
 	public void actionPerformed(ActionEvent e) {
 		// TODO Auto-generated method stub
 		Object o = e.getSource();
+		if(o == bCapture) captureFrame();
 		if(o == bNorth) north();
 		if(o == bSouth) south();
 		if(o == bEast ) east();
