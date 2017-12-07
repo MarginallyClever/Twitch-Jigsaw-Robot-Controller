@@ -198,12 +198,12 @@ public class AddonInterface implements SerialPortEventListener {
     	if(delta<0) {
     		delta=-delta;
     		for(int i=0;i<delta;++i) {
-    			turnLeft();
+    			turnRight();
     		}
     	} else {
     		// delta > 0
     		for(int i=0;i<delta;++i) {
-    			turnRight();
+    			turnLeft();
     		}
     	}
     }
