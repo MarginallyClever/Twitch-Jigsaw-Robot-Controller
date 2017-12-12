@@ -1,5 +1,6 @@
 package com.TwitchJigsawRobotController;
 
+import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
@@ -18,10 +19,14 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import javax.imageio.ImageIO;
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.SwingConstants;
+import javax.swing.border.BevelBorder;
 
 import org.bytedeco.javacpp.opencv_core.Mat;
 import org.bytedeco.javacpp.opencv_videoio.VideoCapture;
@@ -49,7 +54,8 @@ implements ActionListener, PropertyChangeListener  {
     private Timer announcementTimer;
     
     protected JFrame frame;
-    protected JPanel panel;
+    protected JPanel buttonPanel, statusPanel;
+    protected JLabel statusLabel;
 	protected JButton bNorth,bSouth,bEast,bWest,bPick,bDrop,bLeft,bRight,bCapture;
     
 	private long lastMove;
@@ -88,9 +94,12 @@ implements ActionListener, PropertyChangeListener  {
 	protected void setupDialog() {
 		frame = new JFrame("Jigsaw Controller");
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		panel = new JPanel();
-		panel.setLayout(new GridLayout(3,3));
-		frame.setMinimumSize(new Dimension(300,300));
+		frame.setSize(300, 350);
+		
+		buttonPanel = new JPanel();
+		buttonPanel.setLayout(new GridLayout(3,3));
+		buttonPanel.setMinimumSize(new Dimension(300,300));
+		buttonPanel.setSize(new Dimension(300,300));
 
 		bNorth = new JButton("North");
 		bSouth = new JButton("South");
@@ -102,15 +111,15 @@ implements ActionListener, PropertyChangeListener  {
 		bRight = new JButton("CW");
 		bCapture  = new JButton("Capture");
 
-		panel.add(bLeft);
-		panel.add(bNorth);
-		panel.add(bRight);
-		panel.add(bWest);
-		panel.add(bCapture);
-		panel.add(bEast);
-		panel.add(bPick);
-		panel.add(bSouth);
-		panel.add(bDrop);
+		buttonPanel.add(bLeft);
+		buttonPanel.add(bNorth);
+		buttonPanel.add(bRight);
+		buttonPanel.add(bWest);
+		buttonPanel.add(bCapture);
+		buttonPanel.add(bEast);
+		buttonPanel.add(bPick);
+		buttonPanel.add(bSouth);
+		buttonPanel.add(bDrop);
 		
 		bCapture.addActionListener(this);
 		bNorth.addActionListener(this);
@@ -122,8 +131,20 @@ implements ActionListener, PropertyChangeListener  {
 		bLeft.addActionListener(this);
 		bRight.addActionListener(this);
 
-		frame.setContentPane(panel);
-		frame.pack();
+		// create the status bar panel and shove it down the bottom of the frame
+		statusPanel = new JPanel();
+		statusPanel.setBorder(new BevelBorder(BevelBorder.LOWERED));
+		statusPanel.setPreferredSize(new Dimension(frame.getWidth(), 30));
+		statusPanel.setLayout(new BoxLayout(statusPanel, BoxLayout.X_AXIS));
+		statusLabel = new JLabel("");
+		statusLabel.setHorizontalAlignment(SwingConstants.LEFT);
+		statusPanel.add(statusLabel);
+
+		frame.setLayout(new BorderLayout());
+		frame.add(buttonPanel);
+		frame.add(statusPanel,BorderLayout.SOUTH);
+		
+		//frame.pack();
 		frame.setVisible(true);
 
 	}
@@ -290,6 +311,7 @@ implements ActionListener, PropertyChangeListener  {
 				Addon.turnAbsolute(newA);
 			}
 		}
+    	getLocation();
 		
 		return false;
 	}
@@ -484,35 +506,47 @@ implements ActionListener, PropertyChangeListener  {
     	privMessage(sender,"Marginallyclever.com's collaborative jigsaw robot.  Find out more on our website.  Show your support with a like, share, or reblog!");
     }
 
+    protected String getLocation() {
+    	String str = XCarve.where() + " " + Addon.where();
+    	if(statusLabel!=null) statusLabel.setText(str);    	
+    	return str;
+    }
+    
     protected void where(String sender) {
 		// report machine state here
-		String arg1 = "I am at "+/*IPAddress+":12345 "+*/ XCarve.where() + " " + Addon.where();
+		String arg1 = "I am at "+/*IPAddress+":12345 "+*/ getLocation();
 		if(sender.equals(CHANNEL)) sendMessage(CHANNEL,arg1);
 		else privMessage(sender, arg1);
     }
     
     protected void north() {
     	sendMessage(CHANNEL,"North");
+    	getLocation();
     	XCarve.north();
     }
     protected void south() {
     	sendMessage(CHANNEL,"South");
+    	getLocation();
     	XCarve.south();
     }
     protected void east() {
     	sendMessage(CHANNEL,"East");
+    	getLocation();
     	XCarve.east();
     }
     protected void west() {
     	sendMessage(CHANNEL,"West");
+    	getLocation();
     	XCarve.west();
     }
     protected void left() {
     	sendMessage(CHANNEL,"Left");
+    	getLocation();
     	Addon.turnRight();
     }
     protected void right() {
     	sendMessage(CHANNEL,"Right");
+    	getLocation();
     	Addon.turnLeft();
     }
     protected void drop() {
