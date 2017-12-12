@@ -18,9 +18,9 @@ public class XCarveInterface implements SerialPortEventListener{
 
     // software limits
 	static float MAX_X = 800; // mm
-	static float MIN_X = 0;   // mm
+	static float MIN_X = -30;   // mm
 	static float MAX_Y = 800; // mm
-	static float MIN_Y = 0;   // mm
+	static float MIN_Y = 14;   // mm
 	static float MAX_Z = 0;  // mm
 	static float MIN_Z = -80;   // mm
     static float FEED_RATE = 125;  // mm
@@ -146,7 +146,7 @@ public class XCarveInterface implements SerialPortEventListener{
 
 	public void startupInstructions() {
         goHome();
-        setPosition(0,0,0);  // make sure it knows it is at 0,0,0
+        setPosition(MIN_X,MIN_Y,0);  // make sure it knows it is at 0,0,0
         sendToXCarve("G54");  // default coordinate system
         relativeMode();
         
