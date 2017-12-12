@@ -25,12 +25,12 @@ public class AddonInterface implements SerialPortEventListener {
     
 	private String serial_recv_buffer=new String();
     private SerialPort addonPort;
-    private int angle,pumpOn,solenoidOn;
+    private int angleSteps,pumpOn,solenoidOn;
     private long lastReceivedTime;
     //private Timer disconnectTimer;
     
 	public AddonInterface() {
-		angle=0;
+		angleSteps=0;
 		pumpOn=0;
 		solenoidOn=0;
 	}
@@ -120,7 +120,13 @@ public class AddonInterface implements SerialPortEventListener {
 			}
 			System.out.print("Addon > ");
 			addonPort.writeBytes(msg.getBytes());
+			
+			long last = lastReceivedTime;
 			System.out.print(msg);
+			
+			while(lastReceivedTime==last) {
+				// block and wait until reply is received?
+			}
 		}
 		catch(SerialPortException e) {
 			e.printStackTrace();
@@ -151,12 +157,14 @@ public class AddonInterface implements SerialPortEventListener {
     }
     
     public void turnLeft() {
-    	angle= (angle + STEPS_PER_TURN +1 ) % STEPS_PER_TURN;
+    	angleSteps= (angleSteps + STEPS_PER_TURN +1 ) % STEPS_PER_TURN;
+    	System.out.println("angle L="+angleSteps+" ("+getAngleDegrees()+")");
     	sendToArduino("R0");
     }
     
     public void turnRight() {
-    	angle= (angle + STEPS_PER_TURN -1 ) % STEPS_PER_TURN;
+    	angleSteps= (angleSteps + STEPS_PER_TURN -1 ) % STEPS_PER_TURN;
+    	System.out.println("angle R="+angleSteps+" ("+getAngleDegrees()+")");
     	sendToArduino("R1");
     }
     
@@ -172,7 +180,7 @@ public class AddonInterface implements SerialPortEventListener {
     
     public float getAngleDegrees() {
     	// convert motor steps to degrees 
-    	float angleDegrees = (float)(angle%STEPS_PER_TURN) * (360.0f/(float)STEPS_PER_TURN);
+    	float angleDegrees = (float)(angleSteps%STEPS_PER_TURN) * (360.0f/(float)STEPS_PER_TURN);
     	return angleDegrees;
     }
     
@@ -191,10 +199,10 @@ public class AddonInterface implements SerialPortEventListener {
     public void turnAbsolute(float newAngleDegrees) {
     	// convert degrees to motor steps
     	int newAngle = convertDegreesToSteps(newAngleDegrees);
-    	if(newAngle==angle) return;
+    	if(newAngle==angleSteps) return;
     	
     	// from here on all values are in motor steps.
-    	int delta = calculateShortestPath(angle,newAngle);    	
+    	int delta = calculateShortestPath(angleSteps,newAngle);    	
     	if(delta<0) {
     		delta=-delta;
     		for(int i=0;i<delta;++i) {
@@ -211,7 +219,7 @@ public class AddonInterface implements SerialPortEventListener {
     public String where() {
     	float angleDegrees = getAngleDegrees();
     	DecimalFormat df = new DecimalFormat();
-    	df.setMaximumFractionDigits(2);
+    	df.setMaximumFractionDigits(1);
     	
     	return new String("A"+df.format(angleDegrees)/*+" P"+p+" S"+s*/);
     }
