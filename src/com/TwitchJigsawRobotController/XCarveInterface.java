@@ -48,7 +48,7 @@ public class XCarveInterface implements SerialPortEventListener{
 		} catch (SerialPortException e) {
 			// TODO Auto-generated catch block
 			//e.printStackTrace();
-			JOptionPane.showMessageDialog(null, "I cannot connect to the XCarve.  Is it on?  is it connected?  More information may be available in the Eclipse stack trace error message.","Error",JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(null, "I cannot connect to the XCarve.  Is it on?  Connected?  E-stop off?  More information may be available in the Eclipse stack trace error message.","Error",JOptionPane.ERROR_MESSAGE);
 			throw e;
 		}
         try {
@@ -85,6 +85,7 @@ public class XCarveInterface implements SerialPortEventListener{
 						// not actually disconnected, still talking on the phone?
 						lastReceivedTime=System.currentTimeMillis()+DISCONNECT_TIMEOUT;
 					} else {
+						JOptionPane.showMessageDialog(null, "I have lost connection to XCarve and cannot reconnect.  Is it on?  Connected?  E-stop off?","Error",JOptionPane.ERROR_MESSAGE);
 						e.printStackTrace();
 					}
 				}

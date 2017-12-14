@@ -47,7 +47,6 @@ public class AddonInterface implements SerialPortEventListener {
 			// TODO Auto-generated catch block
 			//e.printStackTrace();
 			JOptionPane.showMessageDialog(null, "I cannot connect to the Addon.  Is it on?  is it connected?  More information may be available in the Eclipse stack trace error message.","Error",JOptionPane.ERROR_MESSAGE);
-
 			throw e;
 		}
         System.out.println("Connected to Addon");
@@ -75,6 +74,7 @@ public class AddonInterface implements SerialPortEventListener {
 						// not actually disconnected, still talking on the phone?
 						lastReceivedTime=System.currentTimeMillis()+DISCONNECT_TIMEOUT;
 					} else {
+						JOptionPane.showMessageDialog(null, "I have lost connection to the Addon and cannot reconnect.  Is it on?  Connected?","Error",JOptionPane.ERROR_MESSAGE);
 						e.printStackTrace();
 					}
 				}
@@ -124,12 +124,13 @@ public class AddonInterface implements SerialPortEventListener {
 			long last = lastReceivedTime;
 			System.out.print(msg);
 			
-			while(lastReceivedTime==last) {
-				// block and wait until reply is received?
-			}
+			Thread.sleep(200);
 		}
 		catch(SerialPortException e) {
 			e.printStackTrace();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			//e.printStackTrace();
 		}
     }
     
