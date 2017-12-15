@@ -520,34 +520,28 @@ implements ActionListener, PropertyChangeListener  {
     }
     
     protected void north() {
-    	sendMessage(CHANNEL,"North");
-    	getLocation();
     	XCarve.north();
+    	sendMessage(CHANNEL,"North to "+getLocation());
     }
     protected void south() {
-    	sendMessage(CHANNEL,"South");
-    	getLocation();
     	XCarve.south();
+    	sendMessage(CHANNEL,"South to "+getLocation());
     }
     protected void east() {
-    	sendMessage(CHANNEL,"East");
-    	getLocation();
     	XCarve.east();
+    	sendMessage(CHANNEL,"East to "+getLocation());
     }
     protected void west() {
-    	sendMessage(CHANNEL,"West");
-    	getLocation();
     	XCarve.west();
+    	sendMessage(CHANNEL,"West to "+getLocation());
     }
     protected void left() {
-    	sendMessage(CHANNEL,"Left");
-    	getLocation();
     	Addon.turnRight();
+    	sendMessage(CHANNEL,"Left to "+getLocation());
     }
     protected void right() {
-    	sendMessage(CHANNEL,"Right");
-    	getLocation();
     	Addon.turnLeft();
+    	sendMessage(CHANNEL,"Right to "+getLocation());
     }
     protected void drop() {
     	sendMessage(CHANNEL,"Dropping...");

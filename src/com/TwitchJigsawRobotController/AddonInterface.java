@@ -121,7 +121,7 @@ public class AddonInterface implements SerialPortEventListener {
 			System.out.print("Addon > ");
 			addonPort.writeBytes(msg.getBytes());
 			
-			long last = lastReceivedTime;
+			//long last = lastReceivedTime;
 			System.out.print(msg);
 			
 			Thread.sleep(200);
