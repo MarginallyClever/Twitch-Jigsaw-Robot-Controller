@@ -21,8 +21,8 @@ import org.junit.Test;
  */
 public class MapMaker {
 	private static final String STREAM_ADDRESS = "http://192.168.0.100:12345/?action=stream";
-	private static final String CONTENT_LENGTH = "Content-Length: ";
-	private static final String CONTENT_TYPE = "Content-Type: image/jpeg";
+	private static final String CONTENT_LENGTH = "content-length: ";
+	private static final String CONTENT_TYPE = "content-type: image/jpeg";
 
 	public void takeMJPEGFrameCapture(String outputFilename,String outputFileFormat) {
 		//System.out.println("takeMJPEGFrameCapture");
@@ -73,7 +73,7 @@ public class MapMaker {
 			stringWriter.write(currByte);
 			//System.out.print((char)currByte);
 			
-			String tempString = stringWriter.toString(); 
+			String tempString = stringWriter.toString().toLowerCase(); 
 			if(currByte=='\n') {
 				int indexOfType = tempString.indexOf(CONTENT_TYPE);
 				int indexOfLength = tempString.indexOf(CONTENT_LENGTH);

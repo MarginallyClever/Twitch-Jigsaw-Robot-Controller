@@ -316,34 +316,112 @@ implements ActionListener, PropertyChangeListener  {
 		return false;
 	}
     
-    public void captureFrame() {
-    	System.out.println("captureFrame() begin");
-    	VideoCapture cap = new VideoCapture();
-    	cap.open("http://192.168.0.100:12345/?action=stream");
-    	if(cap.isOpened()) {
-        	System.out.println("stream open");
-    		Mat mat = new Mat();
-    		if(cap.read(mat)) {
-    			System.out.println("frame read");
+	/**
+	 * 
+		photos are 640x480
+		
+		table surface area visible is 145x110.
+		google map coordinates are from top left 85,-180 ... bottom right -85,180 
+		
+		google map (cy=0,cx=0)
+		
+		CX = W/2 + XCarveInterface.MIN_X
+		CY = H/2 + XCarveInterface.MIN_Y
+		
+		where 
+		W = XCarveInterface.MAX_X - XCarveInterface.MIN_X
+		H = XCarveInterface.MAX_Y - XCarveInterface.MIN_Y
 
-    			Java2DFrameConverter frameToImage = new Java2DFrameConverter();
-    			OpenCVFrameConverter.ToMat matToFrame = new OpenCVFrameConverter.ToMat();
+	 */
+    public void captureMap() {
+    	System.out.println("captureFrame() begin");
+    	sendMessage(CHANNEL, "Updating the Google Map of the entire table...");
+    	
+    	MapMaker mapMaker = new MapMaker();
+    	
+    	double googleMapMinX = 180;  // matches table X,Y
+    	double googleMapMinY = -90;  // matches table X,Y
+    	double googleMapWidth = -180*2;
+    	double googleMapHeight = 90*2;
+
+    	double tableStepY=145;
+    	double tableStepX=107;
+    	double tableWidth = XCarveInterface.MAX_X - XCarveInterface.MIN_X;
+    	double tableHeight = XCarveInterface.MAX_Y - XCarveInterface.MIN_Y;
+    	double tableCenterX = tableWidth/2 + XCarveInterface.MIN_X;
+    	double tableCenterY = tableHeight/2 + XCarveInterface.MIN_Y;
+    	int tableCellsX = (int)Math.floor(tableWidth / tableStepX);
+    	int tableCellsY = (int)Math.floor(tableHeight / tableStepY);
+
+    	System.out.println(tableWidth);
+    	System.out.println(tableHeight);
+    	System.out.println(tableCenterX);
+    	System.out.println(tableCenterY);
+    	System.out.println(tableCellsX);
+    	System.out.println(tableCellsY);
+/*
+    	for(double y=XCarveInterface.MIN_Y;y<XCarveInterface.MAX_Y;y+=tableStepY) {
+        	for(double x=XCarveInterface.MIN_X;x<XCarveInterface.MAX_X;x+=tableStepX) {
+        		int cellX = (int)Math.floor(googleMapWidth * ( ( x - XCarveInterface.MIN_X ) / tableWidth) + googleMapMinX); 
+        		int cellY = (int)Math.floor(googleMapHeight * ( ( y - XCarveInterface.MIN_Y ) / tableHeight) + googleMapMinY);
+        		String outputFilename = "googleMap/0_"+cellY+"_"+cellX;
+        		System.out.println(x+"\t"+y+" >> "+outputFilename);
+        		//mapMaker.takeMJPEGFrameCapture(outputFilename, "png");
+        	}
+    	}
+*/
+    	for(int y=0;y<=tableCellsY;++y) {
+    		for(int x=0;x<=tableCellsX;++x) {
+    			int cellX = tableCellsX/2-x;
+    			int cellY = tableCellsY/2-y;
+    			float tableX = (float)(x * tableStepX + XCarveInterface.MIN_X);
+    			float tableY = (float)(y * tableStepY + XCarveInterface.MIN_Y);
+    			//String outputFilename = "googleMap/0_"+cellY+"_"+cellX;
+    			//System.out.println(x+"\t"+y+" >> "+outputFilename);
+    			//System.out.println(x+"\t"+y+" >> "+cellX+" "+cellY+" >> "+tableX+" "+tableY);
     			
-    			Frame frame = matToFrame.convert(mat);
-    			BufferedImage image = frameToImage.convert(frame);
-    			try {
-    				File outputfile = new File("saved.jpg");
-    			    ImageIO.write(image, "jpg", outputfile);	
-    				System.out.println("Frame written");
-    			} catch(Exception e) {
-    				e.printStackTrace();
+    			if(XCarve.moveAbsolute(tableX,tableY)) {
+    				waitSome(6000);
+        			String outputFilename = "googleMap/0_"+cellY+"_"+cellX;
+        			System.out.println(tableX+","+tableY+" >> "+outputFilename);
+        			mapMaker.takeMJPEGFrameCapture(outputFilename, "png");
+        			waitSome(100);
     			}
     		}
-    		cap.close();
     	}
+    	/*
+    	XCarve.moveAbsolute((float)XCarveInterface.MAX_X,
+    						(float)XCarveInterface.MAX_Y);
+    	waitSome(5000);
+		mapMaker.takeMJPEGFrameCapture("googleMap/0_0_0", "png");
+    	XCarve.moveAbsolute((float)XCarveInterface.MAX_X-(float)tableStepX,
+    						(float)XCarveInterface.MAX_Y);
+    	waitSome(5000);
+		mapMaker.takeMJPEGFrameCapture("googleMap/0_0_1", "png");
+		*/
     	System.out.println("captureFrame() end");
     }
+    
+    protected void waitSome(long millis) {
+		// wait for move to finish
+		try {
+			Thread.sleep(millis);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    }
 	
+    @Test
+    public void testCaptureMap() throws Exception {
+		XCarve = new XCarveInterface();
+		XCarve.connect();
+		long t = XCarve.getLastReceivedTime();
+		while(XCarve.getLastReceivedTime() == t );
+		
+    	captureMap();
+    }
+    
 	/**
 	 * 
 	 * @param message
@@ -582,7 +660,7 @@ implements ActionListener, PropertyChangeListener  {
 	public void actionPerformed(ActionEvent e) {
 		// TODO Auto-generated method stub
 		Object o = e.getSource();
-		if(o == bCapture) captureFrame();
+		if(o == bCapture) captureMap();
 		if(o == bNorth) north();
 		if(o == bSouth) south();
 		if(o == bEast ) east();

@@ -23,13 +23,16 @@ public class XCarveInterface implements SerialPortEventListener{
 	static float MIN_Y = 14;   // mm
 	static float MAX_Z = 0;  // mm
 	static float MIN_Z = -80;   // mm
-    static float FEED_RATE = 125;  // mm
+    static float FEED_RATE = 500;  // mm
 	private String serial_recv_buffer=new String();
 	private SerialPort xCarvePort;
     private float x,y,z;
     private long lastReceivedTime;
     //private Timer disconnectTimer;
     
+    public long getLastReceivedTime() {
+    	return lastReceivedTime;
+    }
 
     public XCarveInterface() {
 		x=MIN_X;

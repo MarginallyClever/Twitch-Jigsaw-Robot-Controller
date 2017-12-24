@@ -19,25 +19,32 @@
 -->
 <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAyyhqlLCEZFt06UGhZFYDOiEe8AtookGk"></script>
 <script>
+
 function CustomMapType() {}
+
 CustomMapType.prototype.tileSize = new google.maps.Size(670,620);
 CustomMapType.prototype.minZoom = 0;
 CustomMapType.prototype.maxZoom = 0;
+
 CustomMapType.prototype.getTile = function(coord, zoom, ownerDocument) {
     var div = ownerDocument.createElement('DIV');
-    var baseURL = 'Images/';
-    baseURL += zoom + '_' + coord.x + '_' + coord.y + '.jpg';
+    var baseURL = './';
+    baseURL += zoom + '_' + coord.x + '_' + coord.y + '.png';
     div.style.width = this.tileSize.width + 'px';
     div.style.height = this.tileSize.height + 'px';
     div.style.backgroundImage = 'url(' + baseURL + ')';
-    console.log(coord);
+    console.log(baseURL + ' '+div.style.width+' '+div.style.height);
     // google maps y down and x right are positive
     // jigsolve x up and y left are positive
     return div;
 };
+
 CustomMapType.prototype.name = "Custom";
 CustomMapType.prototype.alt = "Tile Coordinate Map Type";
+CustomMapType.prototype.tileSize = new google.maps.Size(640,480);
+
 var CustomMap = new CustomMapType();
+
 // bounds of the desired area
 var allowedBounds = new google.maps.LatLngBounds(  // This is confusing so:
     // lat range is -90 south pole to 90 north pole
@@ -45,17 +52,21 @@ var allowedBounds = new google.maps.LatLngBounds(  // This is confusing so:
     new google.maps.LatLng(-85,-180), //LatLng(Bottom, Left)
     new google.maps.LatLng(85,180)    //LatLng(Top,Right)
 );
+
 var boundLimits = {
     maxLat : allowedBounds.getNorthEast().lat(),
     maxLng : allowedBounds.getNorthEast().lng(),
     minLat : allowedBounds.getSouthWest().lat(),
     minLng : allowedBounds.getSouthWest().lng()
 };
+
 var map;
+
 function update_map() {
     checkBounds();
     update_url();
 }
+
 // If the map position is out of range, move it back
 function checkBounds() {/*
     center = map.getCenter();
@@ -77,6 +88,7 @@ function checkBounds() {/*
     newLng = center.lng();
     map.panTo(new google.maps.LatLng(newLat, newLng));
 }
+
 function update_url() {
     var center = map.getCenter();
     var zoom = map.getZoom();
@@ -84,6 +96,7 @@ function update_url() {
     href = href.split("#")[0] || href;
     window.location.replace(href + '#' + center.lat().toFixed(2) + ',' + center.lng().toFixed(2) + ',' + zoom);
 }
+
 function hash_changed() {
     var urlbits = window.location.hash.split('#');
     if(urlbits[1]) {
@@ -92,9 +105,11 @@ function hash_changed() {
         map.setZoom(parseInt(locationbits[2]));
     }
 }
+
 if ("onhashchange" in window) {
     window.onhashchange = hash_changed
 }
+
 function load() {
     var mapOptions = {
         zoom: 0,
@@ -119,6 +134,7 @@ function load() {
 //  addmarker();
 //  addoutline();
 }
+
 function addmarker() {
     var marker = new google.maps.Marker({
         position: new google.maps.LatLng(85,-180),
@@ -133,6 +149,7 @@ function addmarker() {
         title:"Hello World!"
     });
 }
+
 function addoutline() {
     var flightPlanCoordinates = [];
     var flightPath = new google.maps.Polyline({
@@ -143,6 +160,7 @@ function addoutline() {
     });
     flightPath.setMap(map);
 }
+
 </script>
 </head>
 <body onload="load()">
