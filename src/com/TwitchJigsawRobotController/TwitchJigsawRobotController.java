@@ -342,6 +342,9 @@ implements ActionListener, PropertyChangeListener  {
     	
     	MapMaker mapMaker = new MapMaker();
     	
+    	float oldTableX = XCarve.getX();
+    	float oldTableY = XCarve.getY();
+    	
     	double tableStepY=145;
     	double tableStepX=107;
     	double tableWidth = XCarveInterface.MAX_X - XCarveInterface.MIN_X;
@@ -367,6 +370,9 @@ implements ActionListener, PropertyChangeListener  {
     			}
     		}
     	}
+    	
+		XCarve.moveAbsolute(oldTableX,oldTableY);
+		XCarve.waitForCommandsToFinish();
 
     	execute(GIT_PATH+"git commit -am \"Updating google map\"");
     	JOptionPane.showMessageDialog(null, "Please make sure to Git > Sync.  This will send the map to the internet.","Remember!",JOptionPane.WARNING_MESSAGE);
@@ -386,9 +392,7 @@ implements ActionListener, PropertyChangeListener  {
 		    }
 		}
     }
-    
-    @Test 
-    
+ 
     protected void execute(String command) {
         String s = null;
 
