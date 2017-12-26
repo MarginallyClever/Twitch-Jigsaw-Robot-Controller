@@ -364,6 +364,9 @@ implements ActionListener, PropertyChangeListener  {
     			}
     		}
     	}
+
+    	execute(GIT_PATH+"git commit -am \"Updating google map\"");
+    	JOptionPane.showMessageDialog(null, "Please make sure to Git > Sync.  This will send the map to the internet.","Remember!",JOptionPane.WARNING_MESSAGE);
     	
     	System.out.println("mapTable() end");
     }
@@ -413,14 +416,8 @@ implements ActionListener, PropertyChangeListener  {
 		
     	updateMap();
     	
-    	execute(GIT_PATH+"git commit -am \"Updating google map\"");
-    	execute(GIT_PATH+"git push origin master");
-    }
-    
-    @Test
-    public void testExecute() {
-    	execute(GIT_PATH+"git commit -am \"Updating google map\"");
-    	execute(GIT_PATH+"git push origin gh-pages");
+    	// TODO cannot push with out username/password, which I'm NOT putting in the public github repo.
+    	//execute(GIT_PATH+"git push origin master");
     }
    
 	/**
