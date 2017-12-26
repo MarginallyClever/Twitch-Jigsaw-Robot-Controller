@@ -374,14 +374,17 @@ implements ActionListener, PropertyChangeListener  {
     	System.out.println("mapTable() end");
     }
     
+    /**
+     * Delete all png files from the googleMap folder.  Don't delete index.html!
+     */
     protected void deleteOldMapTiles() {
-    		File dir = new File("googleMap");
-    		
-    		for(File file: dir.listFiles()) { 
-    		    if (!file.isDirectory() && !file.getName().contains("index.html")) { 
-    		        file.delete();
-    		    }
-    		}
+		File dir = new File("googleMap");
+		
+		for(File file: dir.listFiles()) { 
+		    if (!file.isDirectory() && !file.getName().contains("index.html")) { 
+		        file.delete();
+		    }
+		}
     }
     
     @Test 
