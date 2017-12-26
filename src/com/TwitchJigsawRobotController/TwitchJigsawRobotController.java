@@ -425,8 +425,7 @@ implements ActionListener, PropertyChangeListener  {
     static final String GIT_PATH = "C:\\Users\\Dan\\AppData\\Local\\GitHub\\PortableGit_f02737a78695063deace08e96d5042710d3e32db\\cmd\\";
     
     @Test
-    public void mapCoordinates() {
-
+    public void testMapCoordinates() {
     	double tableStepY=145;
     	double tableStepX=107;
     	double tableWidth = XCarveInterface.MAX_X - XCarveInterface.MIN_X;
