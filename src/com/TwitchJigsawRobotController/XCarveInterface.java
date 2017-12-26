@@ -187,6 +187,24 @@ public class XCarveInterface implements SerialPortEventListener{
 	}
 	
 	/**
+	 * XCarve replies "OK" immediately when it can buffer a move command.
+	 * It will only reply "OK" from a G4 (dwell) when the buffered moves are done.
+	 * This calls G4 and then waits for the reply to 
+	 */
+	public void waitForCommandsToFinish() {
+		long t = getLastReceivedTime();
+		sendToXCarve("G4 P1");
+		while(getLastReceivedTime() == t ) {
+			try {
+				Thread.sleep(1);
+			}
+			catch(Exception e) {
+				// TODO handle this better?
+			}
+		}
+	}
+	
+	/**
 	 * move the robot to a new x,y.
 	 * @param newX
 	 * @param newY

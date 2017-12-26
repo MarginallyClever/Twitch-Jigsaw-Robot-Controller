@@ -333,43 +333,19 @@ implements ActionListener, PropertyChangeListener  {
 		H = XCarveInterface.MAX_Y - XCarveInterface.MIN_Y
 
 	 */
-    public void captureMap() {
-    	System.out.println("captureFrame() begin");
+    public void updateMap() {
+    	System.out.println("mapTable() begin");
     	sendMessage(CHANNEL, "Updating the Google Map of the entire table...");
     	
     	MapMaker mapMaker = new MapMaker();
     	
-    	double googleMapMinX = 180;  // matches table X,Y
-    	double googleMapMinY = -90;  // matches table X,Y
-    	double googleMapWidth = -180*2;
-    	double googleMapHeight = 90*2;
-
     	double tableStepY=145;
     	double tableStepX=107;
     	double tableWidth = XCarveInterface.MAX_X - XCarveInterface.MIN_X;
     	double tableHeight = XCarveInterface.MAX_Y - XCarveInterface.MIN_Y;
-    	double tableCenterX = tableWidth/2 + XCarveInterface.MIN_X;
-    	double tableCenterY = tableHeight/2 + XCarveInterface.MIN_Y;
     	int tableCellsX = (int)Math.floor(tableWidth / tableStepX);
     	int tableCellsY = (int)Math.floor(tableHeight / tableStepY);
 
-    	System.out.println(tableWidth);
-    	System.out.println(tableHeight);
-    	System.out.println(tableCenterX);
-    	System.out.println(tableCenterY);
-    	System.out.println(tableCellsX);
-    	System.out.println(tableCellsY);
-/*
-    	for(double y=XCarveInterface.MIN_Y;y<XCarveInterface.MAX_Y;y+=tableStepY) {
-        	for(double x=XCarveInterface.MIN_X;x<XCarveInterface.MAX_X;x+=tableStepX) {
-        		int cellX = (int)Math.floor(googleMapWidth * ( ( x - XCarveInterface.MIN_X ) / tableWidth) + googleMapMinX); 
-        		int cellY = (int)Math.floor(googleMapHeight * ( ( y - XCarveInterface.MIN_Y ) / tableHeight) + googleMapMinY);
-        		String outputFilename = "googleMap/0_"+cellY+"_"+cellX;
-        		System.out.println(x+"\t"+y+" >> "+outputFilename);
-        		//mapMaker.takeMJPEGFrameCapture(outputFilename, "png");
-        	}
-    	}
-*/
     	for(int y=0;y<=tableCellsY;++y) {
     		for(int x=0;x<=tableCellsX;++x) {
     			int cellX = tableCellsX/2-x;
@@ -381,47 +357,72 @@ implements ActionListener, PropertyChangeListener  {
     			//System.out.println(x+"\t"+y+" >> "+cellX+" "+cellY+" >> "+tableX+" "+tableY);
     			
     			if(XCarve.moveAbsolute(tableX,tableY)) {
-    				waitSome(6000);
+    				XCarve.waitForCommandsToFinish();
         			String outputFilename = "googleMap/0_"+cellY+"_"+cellX;
         			System.out.println(tableX+","+tableY+" >> "+outputFilename);
         			mapMaker.takeMJPEGFrameCapture(outputFilename, "png");
-        			waitSome(100);
     			}
     		}
     	}
-    	/*
-    	XCarve.moveAbsolute((float)XCarveInterface.MAX_X,
-    						(float)XCarveInterface.MAX_Y);
-    	waitSome(5000);
-		mapMaker.takeMJPEGFrameCapture("googleMap/0_0_0", "png");
-    	XCarve.moveAbsolute((float)XCarveInterface.MAX_X-(float)tableStepX,
-    						(float)XCarveInterface.MAX_Y);
-    	waitSome(5000);
-		mapMaker.takeMJPEGFrameCapture("googleMap/0_0_1", "png");
-		*/
-    	System.out.println("captureFrame() end");
+    	
+    	System.out.println("mapTable() end");
     }
     
-    protected void waitSome(long millis) {
-		// wait for move to finish
-		try {
-			Thread.sleep(millis);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+    protected void execute(String command) {
+        String s = null;
+
+        try {
+        	// run the command
+            // using the Runtime exec method:
+            Process p = Runtime.getRuntime().exec(command);
+            
+            BufferedReader stdInput = new BufferedReader(new 
+                 InputStreamReader(p.getInputStream()));
+
+            BufferedReader stdError = new BufferedReader(new 
+                 InputStreamReader(p.getErrorStream()));
+
+            // read the output from the command
+            System.out.println("Here is the standard output of the command:\n");
+            while ((s = stdInput.readLine()) != null) {
+                System.out.println(s);
+            }
+            
+            // read any errors from the attempted command
+            System.out.println("Here is the standard error of the command (if any):\n");
+            while ((s = stdError.readLine()) != null) {
+                System.out.println(s);
+            }
+            
+            System.exit(0);
+        }
+        catch (IOException e) {
+            System.out.println("exception happened - here's what I know: ");
+            e.printStackTrace();
+            System.exit(-1);
+        }
     }
-	
+
+    static final String GIT_PATH = "C:\\Users\\Dan\\AppData\\Local\\GitHub\\PortableGit_f02737a78695063deace08e96d5042710d3e32db\\cmd\\";
+    
     @Test
-    public void testCaptureMap() throws Exception {
+    public void testUpdateMap() throws Exception {
 		XCarve = new XCarveInterface();
 		XCarve.connect();
-		long t = XCarve.getLastReceivedTime();
-		while(XCarve.getLastReceivedTime() == t );
+		XCarve.waitForCommandsToFinish();
 		
-    	captureMap();
+    	updateMap();
+    	
+    	execute(GIT_PATH+"git commit -am \"Updating google map\"");
+    	execute(GIT_PATH+"git push origin master");
     }
     
+    @Test
+    public void testExecute() {
+    	execute(GIT_PATH+"git commit -am \"Updating google map\"");
+    	execute(GIT_PATH+"git push origin gh-pages");
+    }
+   
 	/**
 	 * 
 	 * @param message
@@ -660,7 +661,7 @@ implements ActionListener, PropertyChangeListener  {
 	public void actionPerformed(ActionEvent e) {
 		// TODO Auto-generated method stub
 		Object o = e.getSource();
-		if(o == bCapture) captureMap();
+		if(o == bCapture) updateMap();
 		if(o == bNorth) north();
 		if(o == bSouth) south();
 		if(o == bEast ) east();
