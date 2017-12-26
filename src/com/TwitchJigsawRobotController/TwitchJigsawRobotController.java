@@ -28,6 +28,7 @@ import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 import javax.swing.border.BevelBorder;
 
+import org.apache.commons.io.FileUtils;
 import org.bytedeco.javacpp.opencv_core.Mat;
 import org.bytedeco.javacpp.opencv_videoio.VideoCapture;
 import org.bytedeco.javacv.Frame;
@@ -337,6 +338,8 @@ implements ActionListener, PropertyChangeListener  {
     	System.out.println("mapTable() begin");
     	sendMessage(CHANNEL, "Updating the Google Map of the entire table...");
     	
+    	deleteOldMapTiles();
+    	
     	MapMaker mapMaker = new MapMaker();
     	
     	double tableStepY=145;
@@ -370,6 +373,18 @@ implements ActionListener, PropertyChangeListener  {
     	
     	System.out.println("mapTable() end");
     }
+    
+    protected void deleteOldMapTiles() {
+    		File dir = new File("googleMap");
+    		
+    		for(File file: dir.listFiles()) { 
+    		    if (!file.isDirectory() && !file.getName().contains("index.html")) { 
+    		        file.delete();
+    		    }
+    		}
+    }
+    
+    @Test 
     
     protected void execute(String command) {
         String s = null;
