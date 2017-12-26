@@ -343,8 +343,8 @@ implements ActionListener, PropertyChangeListener  {
     	double tableStepX=107;
     	double tableWidth = XCarveInterface.MAX_X - XCarveInterface.MIN_X;
     	double tableHeight = XCarveInterface.MAX_Y - XCarveInterface.MIN_Y;
-    	int tableCellsX = (int)Math.floor(tableWidth / tableStepX);
-    	int tableCellsY = (int)Math.floor(tableHeight / tableStepY);
+    	int tableCellsX = (int)Math.ceil(tableWidth / tableStepX);
+    	int tableCellsY = (int)Math.ceil(tableHeight / tableStepY);
 
     	for(int y=0;y<=tableCellsY;++y) {
     		for(int x=0;x<=tableCellsX;++x) {
