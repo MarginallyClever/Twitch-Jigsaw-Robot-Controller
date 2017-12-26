@@ -182,8 +182,8 @@ public class XCarveInterface implements SerialPortEventListener{
 	 * @return true if in limits.
 	 */
 	public boolean isInBounds(float newX,float newY) {
-		return (newX>=0 && newX< MAX_X 
-			 && newY>=0 && newY< MAX_Y);
+		return (newX>=MIN_X && newX< MAX_X 
+			 && newY>=MIN_Y && newY< MAX_Y);
 	}
 	
 	/**

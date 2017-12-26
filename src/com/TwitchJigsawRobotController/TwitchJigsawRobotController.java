@@ -343,8 +343,8 @@ implements ActionListener, PropertyChangeListener  {
     	double tableStepX=107;
     	double tableWidth = XCarveInterface.MAX_X - XCarveInterface.MIN_X;
     	double tableHeight = XCarveInterface.MAX_Y - XCarveInterface.MIN_Y;
-    	int tableCellsX = (int)Math.ceil(tableWidth / tableStepX);
-    	int tableCellsY = (int)Math.ceil(tableHeight / tableStepY);
+    	int tableCellsX = (int)Math.floor(tableWidth / tableStepX);
+    	int tableCellsY = (int)Math.floor(tableHeight / tableStepY);
 
     	for(int y=0;y<=tableCellsY;++y) {
     		for(int x=0;x<=tableCellsX;++x) {
@@ -405,6 +405,28 @@ implements ActionListener, PropertyChangeListener  {
     }
 
     static final String GIT_PATH = "C:\\Users\\Dan\\AppData\\Local\\GitHub\\PortableGit_f02737a78695063deace08e96d5042710d3e32db\\cmd\\";
+    
+    @Test
+    public void mapCoordinates() {
+
+    	double tableStepY=145;
+    	double tableStepX=107;
+    	double tableWidth = XCarveInterface.MAX_X - XCarveInterface.MIN_X;
+    	double tableHeight = XCarveInterface.MAX_Y - XCarveInterface.MIN_Y;
+    	int tableCellsX = (int)Math.floor(tableWidth / tableStepX);
+    	int tableCellsY = (int)Math.floor(tableHeight / tableStepY);
+
+    	for(int y=0;y<=tableCellsY;++y) {
+    		for(int x=0;x<=tableCellsX;++x) {
+    			int cellX = tableCellsX/2-x;
+    			int cellY = tableCellsY/2-y;
+    			float tableX = (float)(x * tableStepX + XCarveInterface.MIN_X);
+    			float tableY = (float)(y * tableStepY + XCarveInterface.MIN_Y);
+    			String ok = XCarve.isInBounds(tableX,tableY)? "in":"out";
+    			System.out.println(x+"\t"+y+" >> "+cellX+" "+cellY+" >> "+tableX+" "+tableY+" "+ok);
+    		}
+    	}
+    }
     
     @Test
     public void testUpdateMap() throws Exception {
