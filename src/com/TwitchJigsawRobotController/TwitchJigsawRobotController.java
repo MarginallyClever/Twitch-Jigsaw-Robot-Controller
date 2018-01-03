@@ -86,6 +86,7 @@ implements ActionListener, PropertyChangeListener  {
 		getIPAddress();
 		setupAnnouncementTimer();
 		setupDialog();
+		updateMap();
 		lastMove=System.currentTimeMillis();
 		announceOnce=false;
 		isPickedUp=false;
