@@ -409,7 +409,6 @@ implements ActionListener, PropertyChangeListener  {
 	    	BufferedReader buf = new BufferedReader(new InputStreamReader(new FileInputStream("gitAccess.txt")));
 	    	String pushCmd = buf.readLine();
 	    	buf.close();
-	    	System.out.println(GIT_PATH+"git "+pushCmd);
 	    	execute(GIT_PATH+"git "+pushCmd);
 		} catch (FileNotFoundException e) {
 			System.out.println("File not found.");
