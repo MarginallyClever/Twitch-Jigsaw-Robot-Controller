@@ -385,8 +385,10 @@ implements ActionListener, PropertyChangeListener  {
     
     @Test
     public void testGitCommands() {
+    	System.out.println("testGitCommands() start");
     	execute(GIT_PATH+"git commit -am \"Updating google map\"");
     	execute(GIT_PATH+"git push");
+    	System.out.println("testGitCommands() end");
     }
 
     
