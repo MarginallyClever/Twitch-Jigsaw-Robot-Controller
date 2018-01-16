@@ -376,10 +376,19 @@ implements ActionListener, PropertyChangeListener  {
 		XCarve.waitForCommandsToFinish();
 
     	execute(GIT_PATH+"git commit -am \"Updating google map\"");
-    	JOptionPane.showMessageDialog(null, "Please make sure to Git > Sync.  This will send the map to the internet.","Remember!",JOptionPane.WARNING_MESSAGE);
+    	execute(GIT_PATH+"git push");
+    	//JOptionPane.showMessageDialog(null, "Please make sure to Git > Sync.  This will send the map to the internet.","Remember!",JOptionPane.WARNING_MESSAGE);
     	
     	System.out.println("mapTable() end");
     }
+    
+    
+    @Test
+    public void testGitCommands() {
+    	execute(GIT_PATH+"git commit -am \"Updating google map\"");
+    	execute(GIT_PATH+"git push");
+    }
+
     
     /**
      * Delete all png files from the googleMap folder.  Don't delete index.html!
