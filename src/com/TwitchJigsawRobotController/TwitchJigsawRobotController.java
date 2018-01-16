@@ -10,6 +10,8 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
@@ -48,6 +50,7 @@ implements ActionListener, PropertyChangeListener  {
 	static public long ANNOUNCE_DELAY = 60000; // ms
 	static public long SANITY_DROP_DELAY = 120000; // ms
 	static public String MOVE_COMMAND = "GO";
+    static final String GIT_PATH = "C:\\Users\\Dan\\AppData\\Local\\GitHub\\PortableGit_f02737a78695063deace08e96d5042710d3e32db\\cmd\\";
 	
 	private XCarveInterface XCarve;
     private AddonInterface Addon;
@@ -375,8 +378,21 @@ implements ActionListener, PropertyChangeListener  {
 		XCarve.moveAbsolute(oldTableX,oldTableY);
 		XCarve.waitForCommandsToFinish();
 
+		String $pushCmd="";
+		
     	execute(GIT_PATH+"git commit -am \"Updating google map\"");
-    	execute(GIT_PATH+"git push");
+		try {
+	    	BufferedReader buf = new BufferedReader(new InputStreamReader(new FileInputStream("gitAccess.txt")));
+	    	String pushCmd = buf.readLine();
+	    	buf.close();
+	    	execute(GIT_PATH+"git "+pushCmd);
+		} catch (FileNotFoundException e) {
+			System.out.println("File not found.");
+			e.printStackTrace();
+		} catch (IOException e) {
+			System.out.println("Could not read file.");
+			e.printStackTrace();
+		}
     	//JOptionPane.showMessageDialog(null, "Please make sure to Git > Sync.  This will send the map to the internet.","Remember!",JOptionPane.WARNING_MESSAGE);
     	
     	System.out.println("mapTable() end");
@@ -386,8 +402,23 @@ implements ActionListener, PropertyChangeListener  {
     @Test
     public void testGitCommands() {
     	System.out.println("testGitCommands() start");
+
+    	System.out.println("Testing commit");
     	execute(GIT_PATH+"git commit -am \"Updating google map\"");
-    	execute(GIT_PATH+"git push");
+
+    	System.out.println("Testing push");
+		try {
+	    	BufferedReader buf = new BufferedReader(new InputStreamReader(new FileInputStream("gitAccess.txt")));
+	    	String pushCmd = buf.readLine();
+	    	buf.close();
+	    	execute(GIT_PATH+"git "+pushCmd);
+		} catch (FileNotFoundException e) {
+			System.out.println("File not found.");
+			e.printStackTrace();
+		} catch (IOException e) {
+			System.out.println("Could not read file.");
+			e.printStackTrace();
+		}
     	System.out.println("testGitCommands() end");
     }
 
@@ -438,7 +469,6 @@ implements ActionListener, PropertyChangeListener  {
         }
     }
 
-    static final String GIT_PATH = "C:\\Users\\Dan\\AppData\\Local\\GitHub\\PortableGit_f02737a78695063deace08e96d5042710d3e32db\\cmd\\";
     
     @Test
     public void testMapCoordinates() {
