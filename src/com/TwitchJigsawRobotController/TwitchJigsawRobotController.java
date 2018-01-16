@@ -378,8 +378,6 @@ implements ActionListener, PropertyChangeListener  {
 		XCarve.moveAbsolute(oldTableX,oldTableY);
 		XCarve.waitForCommandsToFinish();
 
-		String $pushCmd="";
-		
     	execute(GIT_PATH+"git commit -am \"Updating google map\"");
 		try {
 	    	BufferedReader buf = new BufferedReader(new InputStreamReader(new FileInputStream("gitAccess.txt")));
