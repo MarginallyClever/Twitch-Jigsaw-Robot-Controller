@@ -356,7 +356,7 @@ implements ActionListener, PropertyChangeListener  {
     	double tableHeight = XCarveInterface.MAX_Y - XCarveInterface.MIN_Y;
     	int tableCellsX = (int)Math.floor(tableWidth / tableStepX);
     	int tableCellsY = (int)Math.floor(tableHeight / tableStepY);
-
+/*
     	try {
 	    	for(int y=0;y<=tableCellsY;++y) {
 	    		for(int x=0;x<=tableCellsX;++x) {
@@ -379,7 +379,7 @@ implements ActionListener, PropertyChangeListener  {
     	} catch(ConnectException e) {
 			JOptionPane.showMessageDialog(null, "I failed to take a photo.  It's a video streaming problem.","Error",JOptionPane.ERROR_MESSAGE);
 			e.printStackTrace();
-		} catch(Exception e) {}
+		} catch(Exception e) {}*/
     	
 		XCarve.moveAbsolute(oldTableX,oldTableY);
 		XCarve.waitForCommandsToFinish();
