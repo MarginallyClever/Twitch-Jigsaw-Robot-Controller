@@ -24,35 +24,30 @@ public class MapMaker {
 	private static final String CONTENT_LENGTH = "content-length: ";
 	private static final String CONTENT_TYPE = "content-type: image/jpeg";
 
-	public void takeMJPEGFrameCapture(String outputFilename,String outputFileFormat) {
+	public void takeMJPEGFrameCapture(String outputFilename,String outputFileFormat) throws Exception {
 		//System.out.println("takeMJPEGFrameCapture");
-		try {
-			//System.out.println("connecting");
-			URL url = new URL(STREAM_ADDRESS);
-			URLConnection urlConn = url.openConnection();
-			urlConn.setReadTimeout(1000);
-			urlConn.connect();
+		//System.out.println("connecting");
+		URL url = new URL(STREAM_ADDRESS);
+		URLConnection urlConn = url.openConnection();
+		urlConn.setReadTimeout(1000);
+		urlConn.connect();
 
-			//System.out.println("get stream");
-			InputStream urlStream = urlConn.getInputStream();
+		//System.out.println("get stream");
+		InputStream urlStream = urlConn.getInputStream();
 
-			//System.out.println("retrieve image");
-			byte [] imageBytes = retrieveNextImage(urlStream);
-			//System.out.println("get byte array");
-			ByteArrayInputStream bais = new ByteArrayInputStream(imageBytes);
-			BufferedImage bufferedImage = ImageIO.read(bais);
-	    	if(bufferedImage!=null) {
-				//System.out.println("saving");
-		    	File outputFile = new File(outputFilename+"."+outputFileFormat);
-		    	//System.out.println("Saved to "+outputFile.getAbsoluteFile());
-	    		ImageIO.write(bufferedImage, outputFileFormat, outputFile);
-	    	}
-			//System.out.println("closing");
-	    	urlStream.close();
-		} catch(Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		//System.out.println("retrieve image");
+		byte [] imageBytes = retrieveNextImage(urlStream);
+		//System.out.println("get byte array");
+		ByteArrayInputStream bais = new ByteArrayInputStream(imageBytes);
+		BufferedImage bufferedImage = ImageIO.read(bais);
+    	if(bufferedImage!=null) {
+			//System.out.println("saving");
+	    	File outputFile = new File(outputFilename+"."+outputFileFormat);
+	    	//System.out.println("Saved to "+outputFile.getAbsoluteFile());
+    		ImageIO.write(bufferedImage, outputFileFormat, outputFile);
+    	}
+		//System.out.println("closing");
+    	urlStream.close();
 		//System.out.println("done");
 	}
 	
@@ -130,7 +125,7 @@ public class MapMaker {
 	}
 */
 	@Test
-	public void testMJPEGCapture() {
+	public void testMJPEGCapture() throws Exception {
 		takeMJPEGFrameCapture("test3","png");
 	}
 }

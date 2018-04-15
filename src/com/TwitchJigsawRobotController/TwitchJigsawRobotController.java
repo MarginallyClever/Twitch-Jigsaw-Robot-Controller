@@ -14,6 +14,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.ConnectException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.StringTokenizer;
@@ -356,24 +357,29 @@ implements ActionListener, PropertyChangeListener  {
     	int tableCellsX = (int)Math.floor(tableWidth / tableStepX);
     	int tableCellsY = (int)Math.floor(tableHeight / tableStepY);
 
-    	for(int y=0;y<=tableCellsY;++y) {
-    		for(int x=0;x<=tableCellsX;++x) {
-    			int cellX = tableCellsX/2-x;
-    			int cellY = tableCellsY/2-y;
-    			float tableX = (float)(x * tableStepX + XCarveInterface.MIN_X);
-    			float tableY = (float)(y * tableStepY + XCarveInterface.MIN_Y);
-    			//String outputFilename = "googleMap/0_"+cellY+"_"+cellX;
-    			//System.out.println(x+"\t"+y+" >> "+outputFilename);
-    			//System.out.println(x+"\t"+y+" >> "+cellX+" "+cellY+" >> "+tableX+" "+tableY);
-    			
-    			if(XCarve.moveAbsolute(tableX,tableY)) {
-    				XCarve.waitForCommandsToFinish();
-        			String outputFilename = "googleMap/0_"+cellY+"_"+cellX;
-        			System.out.println(tableX+","+tableY+" >> "+outputFilename);
-        			mapMaker.takeMJPEGFrameCapture(outputFilename, "png");
-    			}
-    		}
-    	}
+    	try {
+	    	for(int y=0;y<=tableCellsY;++y) {
+	    		for(int x=0;x<=tableCellsX;++x) {
+	    			int cellX = tableCellsX/2-x;
+	    			int cellY = tableCellsY/2-y;
+	    			float tableX = (float)(x * tableStepX + XCarveInterface.MIN_X);
+	    			float tableY = (float)(y * tableStepY + XCarveInterface.MIN_Y);
+	    			//String outputFilename = "googleMap/0_"+cellY+"_"+cellX;
+	    			//System.out.println(x+"\t"+y+" >> "+outputFilename);
+	    			//System.out.println(x+"\t"+y+" >> "+cellX+" "+cellY+" >> "+tableX+" "+tableY);
+	    			
+	    			if(XCarve.moveAbsolute(tableX,tableY)) {
+	    				XCarve.waitForCommandsToFinish();
+	        			String outputFilename = "googleMap/0_"+cellY+"_"+cellX;
+	        			System.out.println(tableX+","+tableY+" >> "+outputFilename);
+	        			mapMaker.takeMJPEGFrameCapture(outputFilename, "png");
+	    			}
+	    		}
+	    	}
+    	} catch(ConnectException e) {
+			JOptionPane.showMessageDialog(null, "I failed to take a photo.  It's a video streaming problem.","Error",JOptionPane.ERROR_MESSAGE);
+			e.printStackTrace();
+		} catch(Exception e) {}
     	
 		XCarve.moveAbsolute(oldTableX,oldTableY);
 		XCarve.waitForCommandsToFinish();
